@@ -232,9 +232,9 @@ function renderHero(events, index, state) {
 }
 
 /**
- * Kategori Bazlı Ürün Döngüleri & Gelecek Tahmin Modülü.
- * Sitenin temel amacını yanıtlar:
- * "Hangi cihaz ne zaman çıktı, kaç ayda bir yenileniyor ve bir sonraki ne zaman gelecek?"
+ * Kategori Bazlı Ürün Tahmin Modülü.
+ * İlk çıkacak cihaz ilk sırada yer alacak şekilde sıralanır (tarih önceliği).
+ * Sadece en net 3 bilgiyi içerir: Son Çıkış, Geçen Gün ve Sıradaki Tahmini Çıkış.
  */
 function renderCategoryExplorer(state) {
   const currentCat = state.activeCategoryTab || 'iphone';
@@ -257,27 +257,27 @@ function renderCategoryExplorer(state) {
     (f) => f.active && f.category === currentCat && state.matches(f)
   );
 
-  const grid = el('div', { class: 'cat-explorer__grid' });
-
-  for (const f of families) {
+  // Ürünleri tahmini çıkış tarihine göre sırala (Önce çıkması beklenen ilk sırada!)
+  const items = families.map((f) => {
     const pred = predictFamily(f.id, state.ctx, { asOf: state.asOf });
-    if (!pred) continue;
-
+    if (!pred) return null;
     const devices = state.ctx.byFamily.get(f.id) || [];
     const nextName = expectedName(f, devices, pred);
     const last = pred.lastRelease;
+    return { family: f, pred, last, nextName };
+  }).filter(Boolean);
 
-    const hasCadence = pred.cadence && !isNaN(pred.cadence.mean) && pred.cadence.mean > 0;
-    const avgDays = hasCadence ? Math.round(pred.cadence.mean) : null;
-    const avgMonths = avgDays ? Math.round(avgDays / 30.4) : null;
+  // Sıralama: Gecikmiş ürünler en üstte, sonra çıkış tarihi en yakın olanlar.
+  items.sort((a, b) => a.pred.date - b.pred.date);
 
-    const cadenceValText = avgMonths ? `~${avgMonths} Ayda Bir` : 'Tek Sürüm / İlk Nesil';
-    const cadenceSubText = avgDays ? `Geçmiş döngü: ${avgDays} gün (${pred.cadence.n} nesil verisi)` : 'Tek nesil geçmiş verisi';
+  const grid = el('div', { class: 'cat-explorer__grid' });
+
+  for (const item of items) {
+    const { family: f, pred, last, nextName } = item;
 
     const card = el('div', {
       class: 'cat-card',
       style: accentStyle(state.categories, f.category),
-      onClick: () => openFamily(f.id, state),
     },
       el('div', { class: 'cat-card__header' },
         el('div', { class: 'cat-card__title-group' },
@@ -288,21 +288,14 @@ function renderCategoryExplorer(state) {
       ),
 
       el('div', { class: 'cat-card__metrics' },
-        // En Son Çıkan Model & Tarih
+        // 1. En Son Çıkan Model
         el('div', { class: 'cat-card__metric' },
-          el('span', { class: 'cat-card__label' }, 'En Son Ne Zaman Çıktı?'),
+          el('span', { class: 'cat-card__label' }, 'En Son Çıkan Model'),
           el('div', { class: 'cat-card__val' }, last.name),
-          el('span', { class: 'cat-card__sub' }, `${fmtLong(toDate(last.released))} (${pred.daysSinceLast} gün önce)`)
+          el('span', { class: 'cat-card__sub' }, `${fmtLong(toDate(last.released))} · (${pred.daysSinceLast} gün önce çıktı)`)
         ),
 
-        // Yenilenme Döngüsü
-        el('div', { class: 'cat-card__metric' },
-          el('span', { class: 'cat-card__label' }, 'Ortalama Yenilenme Aralığı'),
-          el('div', { class: 'cat-card__val' }, cadenceValText),
-          el('span', { class: 'cat-card__sub' }, cadenceSubText)
-        ),
-
-        // Bir Sonraki Çıkış Tahmini
+        // 2. Bir Sonraki Çıkış Tahmini
         el('div', { class: 'cat-card__metric cat-card__metric--next' },
           el('span', { class: 'cat-card__label' }, 'Sıradaki Model & Tahmini Çıkış'),
           el('div', { class: 'cat-card__val cat-card__val--highlight' }, nextName),
@@ -312,11 +305,6 @@ function renderCategoryExplorer(state) {
               : `🚀 Tahmini Lansman: ${fmtLong(pred.date)} (${fmtAway(pred.daysAway)})`
           )
         )
-      ),
-
-      el('div', { class: 'cat-card__footer' },
-        el('span', { class: 'cat-card__range' }, `Tahmini Satış Penceresi: ${fmtRange(pred.low, pred.high)}`),
-        el('button', { class: 'cat-card__link' }, 'Gerekçe & Detaylar →')
       )
     );
 
@@ -325,8 +313,8 @@ function renderCategoryExplorer(state) {
 
   return el('div', { class: 'cat-explorer' },
     el('div', { class: 'section-head' },
-      el('h2', {}, 'Ürün Döngüleri & Gelecek Tahminleri'),
-      el('p', {}, 'Hangi cihaz en son ne zaman çıktı, ortalama kaç ayda bir yenileniyor ve bir sonraki modeli ne zaman gelecek?')
+      el('h2', {}, 'Ürün Çıkış Tahminleri'),
+      el('p', {}, 'İlk çıkması beklenen ürünler üst sırada listelenir. Son çıkış ve tahmini gelecek lansman tarihleri.')
     ),
     catTabs,
     grid
