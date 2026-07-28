@@ -1,0 +1,161 @@
+/* ---------------------------------------------------------- radar */
+.radar-lede {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 10px; margin-bottom: 20px;
+}
+.stat { padding: 13px 15px; }
+.stat__k { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); font-weight: 600; }
+.stat__v { font-size: 22px; font-weight: 640; letter-spacing: -0.02em; margin-top: 3px; font-variant-numeric: tabular-nums; }
+.stat__s { font-size: 12px; color: var(--text-dim); margin-top: 1px; }
+
+.radar-list { display: flex; flex-direction: column; gap: 8px; }
+
+.rcard {
+  display: grid;
+  grid-template-columns: 4px minmax(0, 1fr) auto;
+  align-items: stretch;
+  overflow: hidden;
+  text-align: left; width: 100%; font: inherit; color: inherit;
+  cursor: pointer; appearance: none; padding: 0;
+  transition: border-color .15s, transform .1s;
+}
+.rcard:hover { border-color: color-mix(in oklab, var(--accent) 45%, var(--border)); }
+.rcard:active { transform: scale(.997); }
+.rcard__rail { background: var(--accent); }
+.rcard__body { padding: 13px 16px; min-width: 0; }
+.rcard__title { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+.rcard__name { font-size: 15px; font-weight: 600; letter-spacing: -0.01em; }
+.rcard__cat { font-size: 11px; font-weight: 600; color: var(--accent); text-transform: uppercase; letter-spacing: .05em; }
+.rcard__meta { display: block; font-size: 12.5px; color: var(--text-dim); margin-top: 4px; }
+.rcard__side {
+  padding: 13px 16px; text-align: right; border-left: 1px solid var(--border-soft);
+  display: flex; flex-direction: column; justify-content: center; gap: 4px;
+  background: color-mix(in oklab, var(--surface-2) 55%, transparent);
+}
+.rcard__when { font-size: 14.5px; font-weight: 620; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.rcard__away { font-size: 11.5px; color: var(--text-faint); white-space: nowrap; }
+.rcard--soon .rcard__when { color: var(--accent); }
+
+/* ---------------------------------------------------------- detay paneli */
+.drawer-scrim {
+  position: fixed; inset: 0; z-index: 60;
+  background: rgb(0 0 0 / .55); backdrop-filter: blur(3px);
+  display: flex; justify-content: flex-end;
+}
+.drawer-scrim[hidden] { display: none; }
+.drawer {
+  width: min(560px, 100%); height: 100%; overflow-y: auto;
+  background: var(--bg-elev); border-left: 1px solid var(--border);
+  padding: 22px 24px 60px;
+  animation: slide-in .22s cubic-bezier(.22,.8,.3,1);
+}
+@keyframes slide-in { from { transform: translateX(24px); opacity: .4 } }
+@media (prefers-reduced-motion: reduce) { .drawer { animation: none } }
+
+.drawer__head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 4px; }
+.drawer__head h3 { font-size: 20px; font-weight: 650; letter-spacing: -0.02em; flex: 1; }
+.drawer__sub { font-size: 13px; color: var(--text-dim); margin-bottom: 20px; }
+
+.verdict {
+  padding: 16px 18px; border-radius: var(--radius);
+  background: var(--surface); border: 1px solid var(--border);
+  border-left: 3px solid var(--accent); margin-bottom: 20px;
+}
+.verdict__date { font-size: 24px; font-weight: 660; letter-spacing: -0.03em; font-variant-numeric: tabular-nums; }
+.verdict__range { font-size: 13px; color: var(--text-dim); margin-top: 3px; font-variant-numeric: tabular-nums; }
+.verdict__row { display: flex; align-items: center; gap: 8px; margin-top: 11px; flex-wrap: wrap; }
+
+.dsec { margin-bottom: 22px; }
+.dsec > h4 {
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .06em;
+  color: var(--text-faint); font-weight: 660; margin-bottom: 9px;
+}
+.reasons { list-style: none; padding: 0; display: flex; flex-direction: column; gap: 9px; }
+.reasons li {
+  font-size: 13.5px; color: var(--text-dim); line-height: 1.5;
+  padding-left: 16px; position: relative;
+}
+.reasons li::before {
+  content: ''; position: absolute; left: 0; top: 8px;
+  width: 5px; height: 5px; border-radius: 50%; background: var(--accent); opacity: .7;
+}
+
+.gapbars { display: flex; flex-direction: column; gap: 6px; }
+.gapbar { display: grid; grid-template-columns: 92px 1fr 48px; align-items: center; gap: 10px; font-size: 12px; }
+.gapbar__l { color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.gapbar__t { display: block; height: 7px; border-radius: 4px; background: var(--surface-2); overflow: hidden; }
+/* span olduğu için blok yapılmalı — aksi halde inline kalır ve genişlik uygulanmaz. */
+.gapbar__f { display: block; height: 100%; border-radius: 4px; background: var(--accent); opacity: .8; }
+.gapbar__v { text-align: right; color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+.histlist { display: flex; flex-direction: column; gap: 1px; }
+.histrow {
+  display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: baseline;
+  padding: 8px 0; border-bottom: 1px solid var(--border-soft); font-size: 13.5px;
+}
+.histrow:last-child { border-bottom: 0; }
+.histrow__n { min-width: 0; }
+.histrow__c { font-size: 11.5px; color: var(--text-faint); }
+.histrow__d { color: var(--text-dim); font-variant-numeric: tabular-nums; font-size: 12.5px; white-space: nowrap; }
+
+/* ---------------------------------------------------------- diffusion matrix */
+.matrix-wrap { overflow-x: auto; border: 1px solid var(--border); border-radius: var(--radius); background: var(--surface); }
+table.matrix { border-collapse: collapse; width: 100%; min-width: 720px; font-size: 13px; }
+.matrix th, .matrix td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border-soft); }
+.matrix thead th {
+  position: sticky; top: 0; background: var(--surface-2); z-index: 1;
+  font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); font-weight: 660;
+  white-space: nowrap;
+}
+.matrix tbody th {
+  font-weight: 560; white-space: nowrap; color: var(--text);
+  position: sticky; left: 0; background: var(--surface); z-index: 1;
+  border-right: 1px solid var(--border-soft);
+}
+.matrix tbody tr:hover td { background: color-mix(in oklab, var(--surface-2) 60%, transparent); }
+.cell { display: flex; flex-direction: column; gap: 1px; }
+.cell__d { font-variant-numeric: tabular-nums; font-size: 12.5px; }
+.cell__l { font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums; }
+.cell--first .cell__l { color: var(--high); font-weight: 620; }
+.cell--pred { color: var(--text-faint); }
+.cell--pred .cell__d { border-bottom: 1px dashed currentColor; display: inline-block; }
+.cell--none { color: var(--text-faint); opacity: .35; }
+
+/* ---------------------------------------------------------- accuracy */
+.acc-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; margin-bottom: 20px; }
+table.plain { border-collapse: collapse; width: 100%; font-size: 13.5px; }
+.plain th, .plain td { padding: 9px 12px; text-align: left; border-bottom: 1px solid var(--border-soft); }
+.plain th { font-size: 11.5px; text-transform: uppercase; letter-spacing: .05em; color: var(--text-faint); font-weight: 660; }
+.plain td.n { text-align: right; font-variant-numeric: tabular-nums; font-family: var(--mono); font-size: 12.5px; }
+.err-good { color: var(--high); }
+.err-ok { color: var(--mid); }
+.err-bad { color: var(--low); }
+
+/* ---------------------------------------------------------- prose */
+.prose { max-width: 74ch; }
+.prose h3 { font-size: 16px; font-weight: 620; margin: 26px 0 8px; letter-spacing: -0.01em; }
+.prose h3:first-child { margin-top: 0; }
+.prose p { font-size: 14px; color: var(--text-dim); margin-bottom: 11px; }
+.prose ul { font-size: 14px; color: var(--text-dim); padding-left: 20px; margin: 0 0 11px; }
+.prose li { margin-bottom: 6px; }
+.prose code {
+  font-family: var(--mono); font-size: 12.5px; background: var(--surface-2);
+  padding: 1.5px 5px; border-radius: 5px; color: var(--text);
+}
+.prose strong { color: var(--text); font-weight: 620; }
+.formula {
+  font-family: var(--mono); font-size: 12.5px; background: var(--surface);
+  border: 1px solid var(--border); border-radius: var(--radius-sm);
+  padding: 12px 14px; margin: 4px 0 14px; overflow-x: auto; color: var(--text-dim);
+  white-space: pre;
+}
+
+@media (max-width: 640px) {
+  .app { padding: 0 14px 80px; }
+  .masthead { margin: 0 -14px 18px; padding: 0 14px; }
+  .brand span { display: none; }
+  .rcard { grid-template-columns: 4px minmax(0, 1fr); }
+  .rcard__side { border-left: 0; border-top: 1px solid var(--border-soft); grid-column: 2; text-align: left; flex-direction: row; align-items: baseline; gap: 10px; }
+  .drawer { padding: 18px 16px 60px; }
+  .verdict__date { font-size: 21px; }
+}

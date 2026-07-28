@@ -1,0 +1,46 @@
+{
+  "_comment": "Apple silikon nesilleri. 'debut' = o çipin ilk kez SATIŞA çıktığı gün (duyuru değil). 'debutFamily' = ilk taşıyan ürün ailesi.",
+  "chips": [
+    { "id": "M1",       "series": "M", "gen": 1, "tier": "base",  "label": "M1",       "node": "5 nm (N5)",   "debut": "2020-11-17", "debutFamily": "macbook-air" },
+    { "id": "M1 Pro",   "series": "M", "gen": 1, "tier": "pro",   "label": "M1 Pro",   "node": "5 nm (N5)",   "debut": "2021-10-26", "debutFamily": "macbook-pro-promax" },
+    { "id": "M1 Max",   "series": "M", "gen": 1, "tier": "max",   "label": "M1 Max",   "node": "5 nm (N5)",   "debut": "2021-10-26", "debutFamily": "macbook-pro-promax" },
+    { "id": "M1 Ultra", "series": "M", "gen": 1, "tier": "ultra", "label": "M1 Ultra", "node": "5 nm (N5)",   "debut": "2022-03-18", "debutFamily": "mac-studio" },
+
+    { "id": "M2",       "series": "M", "gen": 2, "tier": "base",  "label": "M2",       "node": "5 nm (N5P)",  "debut": "2022-06-24", "debutFamily": "macbook-pro-13" },
+    { "id": "M2 Pro",   "series": "M", "gen": 2, "tier": "pro",   "label": "M2 Pro",   "node": "5 nm (N5P)",  "debut": "2023-01-24", "debutFamily": "macbook-pro-promax" },
+    { "id": "M2 Max",   "series": "M", "gen": 2, "tier": "max",   "label": "M2 Max",   "node": "5 nm (N5P)",  "debut": "2023-01-24", "debutFamily": "macbook-pro-promax" },
+    { "id": "M2 Ultra", "series": "M", "gen": 2, "tier": "ultra", "label": "M2 Ultra", "node": "5 nm (N5P)",  "debut": "2023-06-13", "debutFamily": "mac-studio" },
+
+    { "id": "M3",       "series": "M", "gen": 3, "tier": "base",  "label": "M3",       "node": "3 nm (N3B)",  "debut": "2023-11-07", "debutFamily": "macbook-pro-base" },
+    { "id": "M3 Pro",   "series": "M", "gen": 3, "tier": "pro",   "label": "M3 Pro",   "node": "3 nm (N3B)",  "debut": "2023-11-07", "debutFamily": "macbook-pro-promax" },
+    { "id": "M3 Max",   "series": "M", "gen": 3, "tier": "max",   "label": "M3 Max",   "node": "3 nm (N3B)",  "debut": "2023-11-07", "debutFamily": "macbook-pro-promax" },
+    { "id": "M3 Ultra", "series": "M", "gen": 3, "tier": "ultra", "label": "M3 Ultra", "node": "3 nm (N3B)",  "debut": "2025-03-12", "debutFamily": "mac-studio" },
+
+    { "id": "M4",       "series": "M", "gen": 4, "tier": "base",  "label": "M4",       "node": "3 nm (N3E)",  "debut": "2024-05-15", "debutFamily": "ipad-pro" },
+    { "id": "M4 Pro",   "series": "M", "gen": 4, "tier": "pro",   "label": "M4 Pro",   "node": "3 nm (N3E)",  "debut": "2024-11-08", "debutFamily": "macbook-pro-promax" },
+    { "id": "M4 Max",   "series": "M", "gen": 4, "tier": "max",   "label": "M4 Max",   "node": "3 nm (N3E)",  "debut": "2024-11-08", "debutFamily": "macbook-pro-promax" },
+
+    { "id": "M5",       "series": "M", "gen": 5, "tier": "base",  "label": "M5",       "node": "3 nm (N3P)",  "debut": "2025-10-22", "debutFamily": "macbook-pro-base" },
+    { "id": "M5 Pro",   "series": "M", "gen": 5, "tier": "pro",   "label": "M5 Pro",   "node": "3 nm (N3P)",  "debut": "2026-03-11", "debutFamily": "macbook-pro-promax" },
+    { "id": "M5 Max",   "series": "M", "gen": 5, "tier": "max",   "label": "M5 Max",   "node": "3 nm (N3P)",  "debut": "2026-03-11", "debutFamily": "macbook-pro-promax" },
+
+    { "id": "A12 Bionic",  "series": "A", "gen": 12, "tier": "base", "label": "A12",     "node": "7 nm (N7)",  "debut": "2018-09-21", "debutFamily": "iphone-base" },
+    { "id": "A13 Bionic",  "series": "A", "gen": 13, "tier": "base", "label": "A13",     "node": "7 nm (N7P)", "debut": "2019-09-20", "debutFamily": "iphone-base" },
+    { "id": "A14 Bionic",  "series": "A", "gen": 14, "tier": "base", "label": "A14",     "node": "5 nm (N5)",  "debut": "2020-10-23", "debutFamily": "iphone-base" },
+    { "id": "A15 Bionic",  "series": "A", "gen": 15, "tier": "base", "label": "A15",     "node": "5 nm (N5P)", "debut": "2021-09-24", "debutFamily": "iphone-base" },
+    { "id": "A16 Bionic",  "series": "A", "gen": 16, "tier": "base", "label": "A16",     "node": "4 nm (N4)",  "debut": "2022-09-16", "debutFamily": "iphone-pro" },
+    { "id": "A17 Pro",     "series": "A", "gen": 17, "tier": "pro",  "label": "A17 Pro", "node": "3 nm (N3B)", "debut": "2023-09-22", "debutFamily": "iphone-pro" },
+    { "id": "A18",         "series": "A", "gen": 18, "tier": "base", "label": "A18",     "node": "3 nm (N3E)", "debut": "2024-09-20", "debutFamily": "iphone-base" },
+    { "id": "A18 Pro",     "series": "A", "gen": 18, "tier": "pro",  "label": "A18 Pro", "node": "3 nm (N3E)", "debut": "2024-09-20", "debutFamily": "iphone-pro" },
+    { "id": "A19",         "series": "A", "gen": 19, "tier": "base", "label": "A19",     "node": "3 nm (N3P)", "debut": "2025-09-19", "debutFamily": "iphone-base" },
+    { "id": "A19 Pro",     "series": "A", "gen": 19, "tier": "pro",  "label": "A19 Pro", "node": "3 nm (N3P)", "debut": "2025-09-19", "debutFamily": "iphone-pro" },
+
+    { "id": "S5", "series": "S", "gen": 5,  "tier": "base", "label": "S5",  "node": "7 nm", "debut": "2019-09-20", "debutFamily": "watch-series" },
+    { "id": "S6", "series": "S", "gen": 6,  "tier": "base", "label": "S6",  "node": "7 nm", "debut": "2020-09-18", "debutFamily": "watch-series" },
+    { "id": "S7", "series": "S", "gen": 7,  "tier": "base", "label": "S7",  "node": "7 nm", "debut": "2021-10-15", "debutFamily": "watch-series" },
+    { "id": "S8", "series": "S", "gen": 8,  "tier": "base", "label": "S8",  "node": "7 nm", "debut": "2022-09-16", "debutFamily": "watch-series" },
+    { "id": "S9", "series": "S", "gen": 9,  "tier": "base", "label": "S9",  "node": "7 nm", "debut": "2023-09-22", "debutFamily": "watch-series" },
+    { "id": "S10","series": "S", "gen": 10, "tier": "base", "label": "S10", "node": "7 nm", "debut": "2024-09-20", "debutFamily": "watch-series" },
+    { "id": "S11","series": "S", "gen": 11, "tier": "base", "label": "S11", "node": "7 nm", "debut": "2025-09-19", "debutFamily": "watch-series" }
+  ]
+}

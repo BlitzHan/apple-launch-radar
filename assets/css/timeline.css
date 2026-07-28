@@ -1,0 +1,119 @@
+.tl-toolbar { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.tl-legend { display: flex; gap: 14px; flex-wrap: wrap; font-size: 12px; color: var(--text-dim); margin-left: auto; }
+.tl-legend span { display: inline-flex; align-items: center; gap: 6px; }
+.tl-legend i { width: 14px; height: 8px; border-radius: 3px; background: var(--text-faint); display: inline-block; }
+.tl-legend i.is-pred { background: none; border: 1px dashed var(--text-faint); }
+.tl-legend i.is-band { background: linear-gradient(90deg, transparent, var(--text-faint), transparent); opacity: .5; }
+
+.tl {
+  position: relative; overflow-x: auto; overflow-y: hidden;
+  border: 1px solid var(--border); border-radius: var(--radius);
+  background: var(--surface); box-shadow: var(--shadow);
+}
+.tl__inner { position: relative; }
+
+/* zaman ekseni */
+.tl__axis {
+  position: sticky; top: 0; z-index: 3; height: 42px;
+  background: color-mix(in oklab, var(--surface) 94%, transparent);
+  backdrop-filter: blur(8px);
+  border-bottom: 1px solid var(--border);
+}
+.tl__year {
+  position: absolute; top: 0; height: 100%;
+  border-left: 1px solid var(--border);
+  padding: 6px 0 0 8px; font-size: 12px; font-weight: 620; color: var(--text-dim);
+  font-variant-numeric: tabular-nums; pointer-events: none;
+}
+.tl__q {
+  position: absolute; top: 22px; font-size: 10px; color: var(--text-faint);
+  padding-left: 5px; border-left: 1px solid var(--border-soft); height: 18px;
+  pointer-events: none;
+}
+
+/* satırlar */
+.tl__rows { position: relative; }
+.tl__grid { position: absolute; inset: 0; pointer-events: none; z-index: 0; }
+.tl__gridline { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--border-soft); }
+.tl__gridline--year { background: var(--border); }
+
+.tl__row {
+  position: relative; height: 46px;
+  border-bottom: 1px solid var(--border-soft);
+}
+.tl__row:last-child { border-bottom: 0; }
+.tl__row:hover { background: color-mix(in oklab, var(--surface-2) 45%, transparent); }
+
+.tl__label {
+  position: sticky; left: 0; z-index: 2;
+  display: flex; align-items: center; gap: 7px;
+  width: 190px; height: 100%; padding: 0 12px;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  font-size: 12.5px; font-weight: 550; white-space: nowrap;
+  overflow: hidden; text-overflow: ellipsis;
+}
+.tl__label i { width: 3px; height: 16px; border-radius: 2px; background: var(--accent); flex: none; }
+.tl__label span { overflow: hidden; text-overflow: ellipsis; }
+
+/* bugün çizgisi */
+.tl__now { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--overdue); z-index: 4; pointer-events: none; }
+.tl__now::after {
+  content: 'bugün'; position: absolute; top: 4px; left: 5px;
+  font-size: 10px; font-weight: 660; color: var(--overdue);
+  background: var(--surface); padding: 0 4px; border-radius: 4px;
+}
+
+/* sürüm kapsülleri */
+.tl__pip {
+  position: absolute; top: 50%; transform: translate(-50%, -50%);
+  z-index: 1; appearance: none; border: 0; padding: 0; cursor: pointer;
+  height: 22px; min-width: 22px; border-radius: 999px;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 10.5px; font-weight: 660; letter-spacing: -0.01em;
+  padding: 0 7px; white-space: nowrap;
+  box-shadow: 0 0 0 2.5px var(--surface);
+  transition: transform .12s;
+}
+.tl__pip:hover { transform: translate(-50%, -50%) scale(1.14); z-index: 5; }
+.tl__pip--skip { opacity: .55; }
+
+.tl__pred {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  z-index: 1; appearance: none; cursor: pointer; padding: 0;
+  height: 22px; border-radius: 999px;
+  border: 1.5px dashed var(--accent); color: var(--accent);
+  background: color-mix(in oklab, var(--accent) 12%, transparent);
+  display: flex; align-items: center; justify-content: center;
+  font: inherit; font-size: 10.5px; font-weight: 660; white-space: nowrap;
+  min-width: 24px; overflow: hidden;
+}
+.tl__pred:hover { background: color-mix(in oklab, var(--accent) 24%, transparent); }
+.tl__pred--overdue { border-color: var(--overdue); color: var(--overdue); background: color-mix(in oklab, var(--overdue) 12%, transparent); }
+
+.tl__band {
+  position: absolute; top: 50%; transform: translateY(-50%);
+  height: 4px; border-radius: 3px; z-index: 0;
+  background: linear-gradient(90deg,
+    color-mix(in oklab, var(--accent) 6%, transparent),
+    color-mix(in oklab, var(--accent) 40%, transparent),
+    color-mix(in oklab, var(--accent) 6%, transparent));
+}
+
+/* tooltip */
+.tl-tip {
+  position: fixed; z-index: 80; pointer-events: none;
+  max-width: 280px; padding: 9px 12px;
+  background: var(--bg-elev); border: 1px solid var(--border);
+  border-radius: var(--radius-sm); box-shadow: var(--shadow);
+  font-size: 12.5px; line-height: 1.45;
+}
+.tl-tip[hidden] { display: none; }
+.tl-tip strong { display: block; font-size: 13px; font-weight: 620; margin-bottom: 3px; }
+.tl-tip div { color: var(--text-dim); font-variant-numeric: tabular-nums; }
+
+@media (max-width: 640px) {
+  .tl__label { width: 116px; padding: 0 8px; font-size: 11.5px; }
+  .tl-legend { margin-left: 0; width: 100%; }
+}

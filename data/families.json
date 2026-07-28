@@ -1,0 +1,37 @@
+{
+  "_comment": "Ürün aileleri = tahmin motorunun kadans birimi. 'active: false' olan aileler için gelecek tahmini üretilmez.",
+  "categories": [
+    { "id": "iphone", "label": "iPhone", "color": "#3b82f6", "order": 1 },
+    { "id": "ipad",   "label": "iPad",   "color": "#a855f7", "order": 2 },
+    { "id": "mac",    "label": "Mac",    "color": "#f97316", "order": 3 },
+    { "id": "watch",  "label": "Watch",  "color": "#22c55e", "order": 4 }
+  ],
+  "families": [
+    { "id": "iphone-base",  "category": "iphone", "label": "iPhone (standart)",   "short": "iPhone",        "active": true,  "chipAware": true,  "order": 1,  "note": "Ana model hattı. Eylül keynote'unun çekirdeği." },
+    { "id": "iphone-pro",   "category": "iphone", "label": "iPhone Pro",          "short": "iPhone Pro",    "active": true,  "chipAware": true,  "order": 2,  "note": "En yeni A-serisi Pro çipi ilk burada çıkar." },
+    { "id": "iphone-promax","category": "iphone", "label": "iPhone Pro Max",      "short": "Pro Max",       "active": true,  "chipAware": true,  "order": 3 },
+    { "id": "iphone-air",   "category": "iphone", "label": "iPhone Air",          "short": "iPhone Air",    "active": true,  "chipAware": true,  "order": 4,  "note": "2025'te Plus slotunun yerini aldı; tek nesil geçmiş var." },
+    { "id": "iphone-plus",  "category": "iphone", "label": "iPhone Plus",         "short": "Plus",          "active": false, "chipAware": true,  "order": 5,  "note": "16 Plus son nesil; yerini iPhone Air aldı." },
+    { "id": "iphone-mini",  "category": "iphone", "label": "iPhone mini",         "short": "mini",          "active": false, "chipAware": true,  "order": 6,  "note": "13 mini ile sonlandı." },
+    { "id": "iphone-e",     "category": "iphone", "label": "iPhone SE / e serisi","short": "SE / e",        "active": true,  "chipAware": true,  "order": 7,  "note": "SE 2 → SE 3 → 16e → 17e. Şubat–Mart penceresine kaydı." },
+
+    { "id": "ipad-base", "category": "ipad", "label": "iPad (standart)", "short": "iPad",      "active": true, "chipAware": true, "order": 1 },
+    { "id": "ipad-air",  "category": "ipad", "label": "iPad Air",        "short": "iPad Air",  "active": true, "chipAware": true, "order": 2 },
+    { "id": "ipad-pro",  "category": "ipad", "label": "iPad Pro",        "short": "iPad Pro",  "active": true, "chipAware": true, "order": 3, "note": "M4 ilk kez burada çıktı — iPad Pro artık çip öncüsü olabiliyor." },
+    { "id": "ipad-mini", "category": "ipad", "label": "iPad mini",       "short": "iPad mini", "active": true, "chipAware": true, "order": 4 },
+
+    { "id": "macbook-air",        "category": "mac", "label": "MacBook Air",              "short": "MBA",        "active": true,  "chipAware": true, "order": 1, "note": "Baz M çipini MacBook Pro'dan sonra alır — yayılım gecikmesi ölçülebilir." },
+    { "id": "macbook-pro-base",   "category": "mac", "label": "MacBook Pro 14\" (baz M)", "short": "MBP baz",    "active": true,  "chipAware": true, "order": 2, "note": "M3'ten beri baz M çipinin ilk taşıyıcısı." },
+    { "id": "macbook-pro-promax", "category": "mac", "label": "MacBook Pro 14/16\" (Pro/Max)", "short": "MBP Pro/Max", "active": true, "chipAware": true, "order": 3 },
+    { "id": "macbook-pro-13",     "category": "mac", "label": "MacBook Pro 13\"",         "short": "MBP 13",     "active": false, "chipAware": true, "order": 4, "note": "M2 ile sonlandı." },
+    { "id": "macbook-neo",        "category": "mac", "label": "MacBook Neo",              "short": "Neo",        "active": true,  "chipAware": true, "order": 5, "note": "A-serisi çip kullanan ilk Mac. Tek nesil — tahmin zayıf." },
+    { "id": "imac",               "category": "mac", "label": "iMac 24\"",                "short": "iMac",       "active": true,  "chipAware": true, "order": 6 },
+    { "id": "mac-mini",           "category": "mac", "label": "Mac mini",                 "short": "mini",       "active": true,  "chipAware": true, "order": 7 },
+    { "id": "mac-studio",         "category": "mac", "label": "Mac Studio",               "short": "Studio",     "active": true,  "chipAware": true, "order": 8 },
+    { "id": "mac-pro",            "category": "mac", "label": "Mac Pro",                  "short": "Mac Pro",    "active": true,  "chipAware": true, "order": 9, "note": "Tek Apple Silicon nesli — kadans hesaplanamıyor." },
+
+    { "id": "watch-series", "category": "watch", "label": "Apple Watch Series", "short": "Series", "active": true, "chipAware": false, "order": 1 },
+    { "id": "watch-ultra",  "category": "watch", "label": "Apple Watch Ultra",  "short": "Ultra",  "active": true, "chipAware": false, "order": 2 },
+    { "id": "watch-se",     "category": "watch", "label": "Apple Watch SE",     "short": "SE",     "active": true, "chipAware": false, "order": 3, "note": "Düzensiz: 2020 → 2022 → 2025." }
+  ]
+}
