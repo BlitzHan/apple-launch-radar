@@ -3,9 +3,11 @@ import { predictFamily, predictNextChipGen, chipGenerations, toDate, toISO, addD
 import { openFamily } from './drawer.js';
 
 /**
- * Satır = ürün ailesi, kolon = çip nesli.
- * Hücre = o nesli aldığı tarih + çip çıkışından kaç gün sonra aldığı.
- * Boş hücreler yayılım medyanı ile tahmin edilir (kesikli).
+ * Excel Mantığı ile Çip & Model Matrisi.
+ * Satır = Ürün Ailesi (iPhone, iPad, Mac, Watch).
+ * Sütun = Çip Nesli (M1, M2, M3, M4 veya A16, A17, A18, A19...).
+ * Hücre = O çipi aldığı tarih + çip çıkışından kaç gün sonra aldığı.
+ * Gelecek Hücreleri = Tahmini çıkış tarihi + Tahmin mantığı bağlantısı.
  */
 export function renderDiffusion(root, state) {
   clear(root);
@@ -20,17 +22,33 @@ export function renderDiffusion(root, state) {
   const families = state.ctx.families
     .filter((f) => f.chipAware && diffusion.has(f.id) && state.matches(f));
 
+  // Üst Bilgilendirme ve Filtre
   root.append(
     el('div', { class: 'section-head' },
-      el('h2', {}, `${series}-serisi çip yayılımı`),
-      el('p', {}, 'Bir çip nesli piyasaya çıktıktan kaç gün sonra hangi ürüne indi. Kesikli hücreler tahmindir.')
+      el('h2', {}, `${series}-Serisi İşlemci & Model Matrisi`),
+      el('p', {}, 'İşlemcilerin duyuru tarihleri ile cihazların bu çipleri alma sürelerinin Excel matrisi. Kesikli hücreler bir sonraki tahmini temsil eder.')
     ),
-    el('div', { class: 'filters' },
+    el('div', { class: 'excel-banner' },
+      el('div', { class: 'excel-banner__item' },
+        el('span', { class: 'excel-badge excel-badge--first' }, 'İlk Taşıyıcı'),
+        el('span', {}, 'İşlemcinin ilk kez çıktığı cihaz (+0 gün)')
+      ),
+      el('div', { class: 'excel-banner__item' },
+        el('span', { class: 'excel-badge excel-badge--received' }, 'Çıkış Tarihi'),
+        el('span', {}, 'Cihazın o çiple satışa çıktığı tarih (+X gün gecikme)')
+      ),
+      el('div', { class: 'excel-banner__item' },
+        el('span', { class: 'excel-badge excel-badge--pred' }, 'Tahmini Çıkış'),
+        el('span', {}, 'Gelecek çipi alma öngörüsü (Çip Kadansı)')
+      )
+    ),
+    el('div', { class: 'filters', style: { marginBottom: '20px' } },
       el('div', { class: 'chipset' },
         ['M', 'A'].map((s) => el('button', {
-          class: 'chip', 'aria-pressed': String(s === series),
+          class: `chip${s === series ? ' chip--active' : ''}`,
+          'aria-pressed': String(s === series),
           onClick: () => { state.chipSeries = s; state.render(); },
-        }, `${s}-serisi`))
+        }, `${s}-Serisi İşlemciler (${s === 'M' ? 'Mac & iPad' : 'iPhone & Neo'})`))
       )
     )
   );
@@ -40,18 +58,26 @@ export function renderDiffusion(root, state) {
     return;
   }
 
-  const cols = [...gens.map((g) => ({ key: g.key, label: g.key, debut: toDate(g.debut), projected: false })),
-    ...(next ? [{ key: next.key, label: `${next.key} ↗`, debut: next.date, projected: true }] : [])];
+  const cols = [
+    ...gens.map((g) => ({ key: g.key, label: g.key, debut: toDate(g.debut), projected: false })),
+    ...(next ? [{ key: next.key, label: `${next.key} (Gelecek)`, debut: next.date, projected: true }] : [])
+  ];
 
-  const table = el('table', { class: 'matrix' });
+  const table = el('table', { class: 'excel-table' });
+
+  // Sütun Başlıkları (Çip Adı + Çıkış Tarihi)
   table.append(el('thead', {}, el('tr', {},
-    el('th', {}, 'Ürün'),
-    cols.map((c) => el('th', { title: c.projected ? 'Çip nesli henüz duyurulmadı — öngörülen çıkış' : `Çip çıkışı: ${toISO(c.debut)}` },
-      el('div', {}, c.label),
-      el('div', { class: 'cell__l' }, c.projected ? `~${fmtShort(c.debut)}` : fmtShort(c.debut))
+    el('th', { class: 'excel-th-head' }, 'Ürün / Model'),
+    cols.map((c) => el('th', {
+      class: `excel-th-col${c.projected ? ' excel-th-col--pred' : ''}`,
+      title: c.projected ? 'Öngörülen Çip Çıkış Dönemi' : `İşlemci Duyuru Tarihi: ${toISO(c.debut)}`
+    },
+      el('div', { class: 'excel-chip-name' }, c.label),
+      el('div', { class: 'excel-chip-date' }, c.projected ? `~${fmtShort(c.debut)}` : fmtShort(c.debut))
     ))
   )));
 
+  // Satırlar (Ürün Aileleri)
   const tbody = el('tbody');
   for (const f of families) {
     const diff = diffusion.get(f.id);
@@ -60,50 +86,56 @@ export function renderDiffusion(root, state) {
     const devices = state.ctx.byFamily.get(f.id) || [];
 
     const tr = el('tr', { style: accentStyle(state.categories, f.category) });
-    tr.append(el('th', { scope: 'row' },
+    tr.append(el('th', { scope: 'row', class: 'excel-row-head' },
       el('button', {
-        class: 'chip chip--sm', style: { border: 0, background: 'none', padding: 0 },
+        class: 'excel-row-btn',
         onClick: () => openFamily(f.id, state),
-      }, f.label)
+      },
+        el('span', { class: 'excel-row-cat' }, state.categories.find((c) => c.id === f.category)?.label),
+        el('span', { class: 'excel-row-name' }, f.label)
+      )
     ));
 
     for (const c of cols) {
       const hit = byGen.get(c.key);
       if (hit) {
         const dev = devices.find((d) => d.id === hit.deviceId);
-        tr.append(el('td', { class: `cell-td${hit.lag === 0 ? ' cell--first' : ''}`, title: dev?.name },
-          el('span', { class: 'cell' },
-            el('span', { class: 'cell__d' }, fmtShort(hit.released)),
-            el('span', { class: 'cell__l' }, hit.lag === 0 ? 'ilk taşıyıcı' : `+${hit.lag} gün`)
-          )
+        const isFirst = hit.lag === 0;
+        tr.append(el('td', {
+          class: `excel-cell${isFirst ? ' excel-cell--first' : ' excel-cell--hit'}`,
+          title: `${dev?.name ?? f.label}: ${fmtShort(hit.released)} (Çip çıkışından ${hit.lag} gün sonra)`
+        },
+          el('div', { class: 'excel-cell__main' }, fmtShort(hit.released)),
+          el('div', { class: 'excel-cell__sub' }, isFirst ? ' İlk taşıyıcı' : `+${hit.lag} gün`)
         ));
         continue;
       }
 
-      // Bu ürün bu nesli almamış. Yalnızca modelin hedeflediği nesil için tahmin gösterilir;
-      // daha ileriki nesiller için tahmin üstüne tahmin kurmak yanıltıcı olurdu.
+      // Gelecek Tahmini Hücresi
       if (pred?.chip?.genKey === c.key) {
-        tr.append(el('td', { class: 'cell--pred', title: `Yayılım medyanı +${Math.round(diff.median)} gün` },
-          el('span', { class: 'cell' },
-            el('span', { class: 'cell__d' }, fmtShort(pred.date)),
-            el('span', { class: 'cell__l' }, `tahmin · %${pred.confidence}`)
-          )
+        tr.append(el('td', {
+          class: 'excel-cell excel-cell--pred',
+          title: `Tahmini Lansman: ${fmtShort(pred.date)} (Yayılım ortalaması +${Math.round(diff.median)} gün)`
+        },
+          el('div', { class: 'excel-cell__main' }, fmtShort(pred.date)),
+          el('div', { class: 'excel-cell__sub' }, `Tahmin · %${pred.confidence}`)
         ));
       } else {
         const missed = addDays(c.debut, diff.median) <= state.asOf;
         tr.append(el('td', {
-          class: 'cell--none',
-          title: missed ? 'Bu ürün bu nesli atladı' : 'Henüz sırası gelmedi',
+          class: 'excel-cell excel-cell--empty',
+          title: missed ? 'Bu ürün bu nesli atladı' : 'Henüz bu nesle geçmedi',
         }, '—'));
       }
     }
     tbody.append(tr);
   }
   table.append(tbody);
-  root.append(el('div', { class: 'matrix-wrap' }, table));
 
-  root.append(el('p', { class: 'drawer__sub', style: { marginTop: '14px' } },
-    '“İlk taşıyıcı” = o çip nesli ilk kez bu üründe satışa çıktı. ' +
-    'Gecikme, çip neslinin ilk satış gününden ölçülür; ürünün kendi duyuru tarihinden değil.'
+  root.append(el('div', { class: 'matrix-wrap excel-wrap' }, table));
+
+  root.append(el('p', { class: 'drawer__sub', style: { marginTop: '16px' } },
+    '“İlk taşıyıcı” = Apple\'ın o çip neslini ilk kez vitrine çıkardığı cihaz. ' +
+    'Gecikme süreleri (+X gün), işlemcinin ilk çıkış tarihinden itibaren hesaplanır.'
   ));
 }

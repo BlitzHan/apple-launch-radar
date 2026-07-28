@@ -17,8 +17,6 @@ export function buildLaunches(state) {
       .filter(Boolean);
     if (!preds.length) continue;
 
-    // Çapa = en çok kanıtı olan üye. Aynı olayı tahmin ettikleri için güven
-    // toplanmaz; en iyi geçmişe sahip üyenin güveni kullanılır.
     const anchor = preds.slice().sort(
       (a, b) => b.confidence - a.confidence || b.cadence.n - a.cadence.n
     )[0];
@@ -40,14 +38,9 @@ export function buildLaunches(state) {
   return out.sort((a, b) => a.anchor.date - b.anchor.date);
 }
 
-// Geçmiş olaylar kayıttır, dar tutulur: Apple'ın çok günlü duyuru dalgaları en fazla
-// 3-4 gün sürüyor (Mart 2026: 2, 3 ve 4 Mart). 14 gün, iPhone 16e'yi (19 Şub 2025)
-// ayrı bir duyuru olan Mart dalgasıyla birleştiriyordu.
 const PAST_WINDOW = 7;
-// Gelecek olaylar tahmindir; belirsizlik payı daha geniş bir pencereyi haklı çıkarır.
 const FUTURE_WINDOW = 14;
 
-/** Yakın tarihli öğeleri tek etkinlikte toplar (Apple bir keynote'ta çok hat tanıtır). */
 function cluster(items, dateOf, windowDays) {
   const sorted = [...items].sort((a, b) => dateOf(a) - dateOf(b));
   const out = [];
@@ -59,10 +52,6 @@ function cluster(items, dateOf, windowDays) {
   return out;
 }
 
-/**
- * Gezilebilir lansman olayları: geçmiştekiler gerçek duyuru tarihlerinden,
- * gelecektekiler tahminlerden. Tek bir kronolojik dizi halinde döner.
- */
 export function buildEvents(state, launches) {
   const events = [];
 
@@ -80,8 +69,6 @@ export function buildEvents(state, launches) {
       kind: 'past',
       announce,
       sale,
-      // Bir dalgadaki ürünler farklı günlerde satışa çıkabiliyor (Eyl 2020'de
-      // iPad Air 4, aynı etkinlikteki diğerlerinden 35 gün sonra); aralık gösterilir.
       saleEnd: sales[0] === sales[sales.length - 1] ? null : saleEnd,
       lead: diffDays(sale, announce),
       lines: new Set(group.map((d) => d.family)).size,
@@ -90,6 +77,8 @@ export function buildEvents(state, launches) {
         .map((d) => ({
           name: d.name,
           category: d.category,
+          chip: d.chip,
+          released: d.released,
           sub: `${d.chip} · satış ${fmtShort(d.released)}`,
           familyId: d.family,
         })),
@@ -126,6 +115,41 @@ export function buildEvents(state, launches) {
   return events;
 }
 
+/**
+ * İlk giren kullanıcının "Tahmin nereden geliyor?" sorusunu tek bakışta anlamasını sağlayan
+ * 3 adımlı Apple tarzı özet akış göstergesi.
+ */
+function renderOnboardingBanner() {
+  return el('div', { class: 'how-it-works' },
+    el('div', { class: 'how-it-works__title' }, 'Tahmin Mantığı Nasıl Çalışır?'),
+    el('div', { class: 'how-it-works__steps' },
+      el('div', { class: 'how-it-works__step' },
+        el('span', { class: 'how-it-works__num' }, '1'),
+        el('div', { class: 'how-it-works__text' },
+          el('strong', {}, 'Geçmiş Kadans & Çipler'),
+          el('span', {}, 'Apple\'ın 2020\'den beri lansman aralıkları ve çip yayılım süreleri ölçülür.')
+        )
+      ),
+      el('span', { class: 'how-it-works__arrow' }, '→'),
+      el('div', { class: 'how-it-works__step' },
+        el('span', { class: 'how-it-works__num' }, '2'),
+        el('div', { class: 'how-it-works__text' },
+          el('strong', {}, 'İstatistiksel Ölçüm'),
+          el('span', {}, 'Ağırlıklı kadans ve mevsimsel oturtma ile bir sonraki lansman penceresi hesaplanır.')
+        )
+      ),
+      el('span', { class: 'how-it-works__arrow' }, '→'),
+      el('div', { class: 'how-it-works__step' },
+        el('span', { class: 'how-it-works__num' }, '3'),
+        el('div', { class: 'how-it-works__text' },
+          el('strong', {}, 'Gelecek Etkinlik'),
+          el('span', {}, 'Önümüzdeki lansmanda birlikte tanıtılması beklenen modeller öngörülür.')
+        )
+      )
+    )
+  );
+}
+
 function renderHero(events, index, state) {
   const event = events[index];
   const { kind, products, anchor } = event;
@@ -138,6 +162,40 @@ function renderHero(events, index, state) {
     'aria-label': label,
     onClick: () => { state.eventIndex = index + delta; state.render(); },
   }, text);
+
+  // Kategori Butonları Seçicisi (Hero üstünde)
+  const categorySelector = el('div', { class: 'hero__cat-selector' },
+    el('span', { class: 'hero__cat-label' }, 'Gelecek Lansmanı Seç:'),
+    [
+      { id: 'all', label: 'Tüm Ürünler' },
+      { id: 'iphone', label: 'iPhone' },
+      { id: 'ipad', label: 'iPad' },
+      { id: 'watch', label: 'Watch' },
+      { id: 'mac', label: 'Mac' },
+    ].map((cat) => {
+      // Bu kategoriye ait gelecek ilk lansmanın event index'ini bul
+      let targetIndex = null;
+      if (cat.id === 'all') {
+        targetIndex = events.findIndex((e) => e.kind === 'future');
+      } else {
+        targetIndex = events.findIndex(
+          (e) => e.kind === 'future' && e.products.some((p) => p.category === cat.id)
+        );
+      }
+      const isSelected = targetIndex === index;
+
+      return el('button', {
+        class: `hero__cat-btn${isSelected ? ' is-selected' : ''}`,
+        disabled: targetIndex === -1,
+        onClick: () => {
+          if (targetIndex !== -1) {
+            state.eventIndex = targetIndex;
+            state.render();
+          }
+        },
+      }, cat.label);
+    })
+  );
 
   const rows = products.map((prod) =>
     el('div', { class: 'hero__prod', style: accentStyle(state.categories, prod.category) },
@@ -153,7 +211,6 @@ function renderHero(events, index, state) {
     )
   );
 
-  // "Bu modeller en son ne zaman tanıtıldı?" — çoğu zaman hepsi aynı gün.
   const note = future
     ? (event.lastAnnounced.length === 1
         ? `Bu modeller en son ${fmtLong(event.lastAnnounced[0])} tarihinde, hepsi aynı etkinlikte tanıtılmıştı.`
@@ -167,12 +224,13 @@ function renderHero(events, index, state) {
         el('span', { class: 'hero__badge-dot' }),
         el('span', { class: 'hero__badge-text' }, future ? 'Tahmini Etkinlik' : 'Geçmiş Etkinlik')
       ),
+      categorySelector,
       el('div', { class: 'hero__controls' },
         state.eventIndex !== null
           ? el('button', {
               class: 'hero__reset',
               onClick: () => { state.eventIndex = null; state.render(); },
-            }, '↺ Sıradaki lansmana dön')
+            }, '↺ Varsayılana dön')
           : null,
         el('span', { class: 'hero__steps' },
           nav(-1, '‹', 'Önceki lansman'),
@@ -209,11 +267,84 @@ function renderHero(events, index, state) {
   );
 }
 
+/**
+ * Akordeon Lansman Geçmişi — Gerçekleşen lansmanlar en sondan geriye doğru listelenir.
+ * İlk başta kapalıdır; tıklandığında açılır ve çıkan ürünlerin detaylarını gösterir.
+ */
+function renderAccordionHistory(pastEvents, state) {
+  if (!pastEvents.length) return null;
+
+  // En yeni gerçekleşen lansmandan geriye sırala
+  const sortedPast = [...pastEvents].sort((a, b) => b.announce - a.announce);
+
+  const list = el('div', { class: 'accordion-list' });
+
+  sortedPast.forEach((evt, idx) => {
+    let isOpen = idx === 0; // En son lansman varsayılan olarak açık gelsin
+
+    const row = el('div', { class: `accordion-item${isOpen ? ' is-open' : ''}` });
+
+    const header = el('button', {
+      class: 'accordion-header',
+      'aria-expanded': String(isOpen),
+      onClick: () => {
+        isOpen = !isOpen;
+        row.classList.toggle('is-open', isOpen);
+        header.setAttribute('aria-expanded', String(isOpen));
+      },
+    },
+      el('div', { class: 'accordion-left' },
+        el('span', { class: 'accordion-date' }, fmtLong(evt.announce)),
+        el('div', { class: 'accordion-badges' },
+          evt.products.slice(0, 4).map((p) =>
+            el('span', {
+              class: 'badge badge--quiet',
+              style: accentStyle(state.categories, p.category),
+            }, p.name)
+          ),
+          evt.products.length > 4 ? el('span', { class: 'badge badge--quiet' }, `+${evt.products.length - 4}`) : null
+        )
+      ),
+      el('div', { class: 'accordion-right' },
+        el('span', { class: 'accordion-count' }, `${evt.products.length} ürün`),
+        el('span', { class: 'accordion-chevron' }, '›')
+      )
+    );
+
+    const body = el('div', { class: 'accordion-body' },
+      el('div', { class: 'accordion-content' },
+        el('div', { class: 'accordion-grid' },
+          evt.products.map((p) =>
+            el('div', { class: 'accordion-prod', style: accentStyle(state.categories, p.category) },
+              el('div', { class: 'accordion-prod-name' }, p.name),
+              el('div', { class: 'accordion-prod-detail' },
+                el('span', {}, p.chip ? `${p.chip} çipi` : 'Standart çip'),
+                el('span', {}, `Satış: ${fmtShort(p.released)}`)
+              )
+            )
+          )
+        )
+      )
+    );
+
+    row.append(header, body);
+    list.append(row);
+  });
+
+  return el('div', { class: 'history-section' },
+    el('div', { class: 'section-head' },
+      el('h2', {}, 'Gerçekleşen Lansman Geçmişi'),
+      el('p', {}, 'Apple\'ın geçmiş lansmanları (en yeni lansmandan geriye doğru). Tıklayarak detayları görün.')
+    ),
+    list
+  );
+}
+
 export function renderRadar(root, state) {
   clear(root);
   const launches = buildLaunches(state);
   const events = buildEvents(state, launches);
-  // Varsayılan konum: ilk gelecek olay. eventIndex ayarlıysa sınırlar içine kırpılır.
+
   const firstFuture = Math.max(0, events.findIndex((e) => e.kind === 'future'));
   const index = state.eventIndex === null
     ? firstFuture
@@ -224,8 +355,13 @@ export function renderRadar(root, state) {
   const within12 = upcoming.filter((l) => l.anchor.daysAway <= 400);
   const models12 = within12.reduce((n, l) => n + l.preds.length, 0);
 
+  // 1. "Tahmin Mantığı Nasıl Çalışır?" 3 adımlı göstergesi
+  root.append(renderOnboardingBanner());
+
+  // 2. Hero alanı (Kategori seçicili)
   if (events.length) root.append(renderHero(events, index, state));
 
+  // 3. Stat özet kartları
   root.append(
     el('div', { class: 'radar-lede' },
       stat('Gecikmiş', String(overdue.length), 'model penceresi kapandı'),
@@ -235,25 +371,32 @@ export function renderRadar(root, state) {
     )
   );
 
+  // 4. Gecikmiş yenilemeler
   if (overdue.length) {
     root.append(
       el('div', { class: 'section-head' },
         el('h2', {}, 'Gecikmiş yenilemeler'),
         el('p', {}, 'Beklenen pencere kapandı — bu ürünler her an duyurulabilir.')
       ),
-      el('div', { class: 'radar-list', style: { marginBottom: '28px' } }, overdue.map((l) => card(l, state)))
+      el('div', { class: 'radar-list', style: { marginBottom: '36px' } }, overdue.map((l) => card(l, state)))
     );
   }
 
+  // 5. Önümüzdeki tahmini lansmanlar
   root.append(
     el('div', { class: 'section-head' },
-      el('h2', {}, 'Önümüzdeki lansmanlar'),
-      el('p', {}, 'Birlikte çıkması beklenen modeller tek satırda. Karta dokunarak gerekçeyi görün.')
+      el('h2', {}, 'Önümüzdeki Lansmanlar & Modeller'),
+      el('p', {}, 'Birlikte çıkması beklenen modeller tek kartta. Gerekçesini görmek için karta dokunun.')
     ),
     upcoming.length
-      ? el('div', { class: 'radar-list' }, upcoming.map((l) => card(l, state)))
+      ? el('div', { class: 'radar-list', style: { marginBottom: '40px' } }, upcoming.map((l) => card(l, state)))
       : el('div', { class: 'card empty' }, 'Bu filtrelerle gösterilecek tahmin yok.')
   );
+
+  // 6. Akordeon Lansman Geçmişi (Gerçekleşmiş lansmanlar)
+  const pastEvents = events.filter((e) => e.kind === 'past');
+  const historyView = renderAccordionHistory(pastEvents, state);
+  if (historyView) root.append(historyView);
 }
 
 function card(launch, state) {
