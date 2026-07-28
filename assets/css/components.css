@@ -521,30 +521,36 @@
 .accordion-left {
   display: flex;
   align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
+  gap: 16px;
+  flex-wrap: nowrap;
   min-width: 0;
+  flex: 1;
+  overflow: hidden;
 }
 
 .accordion-apple-icon {
   font-size: 16px;
   color: var(--text-dim);
   line-height: 1;
+  flex-shrink: 0;
 }
 
 .accordion-date {
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 600;
   letter-spacing: -0.015em;
   color: var(--text);
   white-space: nowrap;
+  flex-shrink: 0;
+  min-width: 140px;
 }
 
 .accordion-badges {
   display: flex;
   align-items: center;
   gap: 6px;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .accordion-tag {
@@ -558,6 +564,8 @@
   background: color-mix(in oklab, var(--accent, var(--text-faint)) 10%, var(--surface-2));
   color: var(--text);
   border: 1px solid color-mix(in oklab, var(--accent, var(--text-faint)) 20%, transparent);
+  white-space: nowrap;
+  flex-shrink: 0;
 }
 
 .accordion-tag-dot {

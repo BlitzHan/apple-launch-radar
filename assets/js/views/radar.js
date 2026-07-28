@@ -267,8 +267,12 @@ function renderCategoryExplorer(state) {
     const nextName = expectedName(f, devices, pred);
     const last = pred.lastRelease;
 
-    const avgDays = Math.round(pred.cadence.mean);
-    const avgMonths = Math.round(avgDays / 30.4);
+    const hasCadence = pred.cadence && !isNaN(pred.cadence.mean) && pred.cadence.mean > 0;
+    const avgDays = hasCadence ? Math.round(pred.cadence.mean) : null;
+    const avgMonths = avgDays ? Math.round(avgDays / 30.4) : null;
+
+    const cadenceValText = avgMonths ? `~${avgMonths} Ayda Bir` : 'Tek Sürüm / İlk Nesil';
+    const cadenceSubText = avgDays ? `Geçmiş döngü: ${avgDays} gün (${pred.cadence.n} nesil verisi)` : 'Tek nesil geçmiş verisi';
 
     const card = el('div', {
       class: 'cat-card',
@@ -294,8 +298,8 @@ function renderCategoryExplorer(state) {
         // Yenilenme Döngüsü
         el('div', { class: 'cat-card__metric' },
           el('span', { class: 'cat-card__label' }, 'Ortalama Yenilenme Aralığı'),
-          el('div', { class: 'cat-card__val' }, `~${avgMonths} Ayda Bir`),
-          el('span', { class: 'cat-card__sub' }, `Geçmiş döngü: ${avgDays} gün (${pred.cadence.n} nesil verisi)`)
+          el('div', { class: 'cat-card__val' }, cadenceValText),
+          el('span', { class: 'cat-card__sub' }, cadenceSubText)
         ),
 
         // Bir Sonraki Çıkış Tahmini
