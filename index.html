@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Apple Launch Radar — Lansman Zaman Çizelgesi ve Tahmin</title>
+<title>Apple Launch Radar — Lansman Kadansı ve Tahminleri</title>
 <meta name="description" content="2020'den bugüne Apple iPhone, iPad, Mac ve Watch lansmanları; geçmiş kadanstan hesaplanan çıkış tahminleri ve çip yayılım analizi.">
 <meta name="color-scheme" content="dark light">
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>📡</text></svg>">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'></text></svg>">
 <link rel="stylesheet" href="assets/css/base.css">
 <link rel="stylesheet" href="assets/css/components.css">
 <link rel="stylesheet" href="assets/css/timeline.css">
@@ -14,22 +14,34 @@
 <body>
 
 <header class="masthead">
-  <div class="masthead__top">
-    <div class="brand">
-      <h1>Apple Launch Radar</h1>
-      <span>lansman kadansı &amp; çip yayılım tahmini</span>
+  <div class="masthead__global">
+    <div class="masthead__global-inner">
+      <div class="brand">
+        <span class="apple-logo" aria-hidden="true"></span>
+        <div class="brand__text">
+          <h1>Apple Launch Radar</h1>
+          <span class="brand__tagline">Lansman Kadansı &amp; Çip Yayılım Tahmini</span>
+        </div>
+      </div>
+      <div class="masthead__spacer"></div>
+      <div class="masthead__actions">
+        <span class="today" id="today"></span>
+        <button class="icon-btn" id="theme-toggle" title="Temayı değiştir" aria-label="Temayı değiştir">
+          <svg class="theme-icon theme-icon--dark" viewBox="0 0 24 24" width="16" height="16" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+        </button>
+      </div>
     </div>
-    <div class="masthead__spacer"></div>
-    <span class="today" id="today"></span>
-    <button class="icon-btn" id="theme-toggle" title="Temayı değiştir" aria-label="Temayı değiştir">◐</button>
   </div>
-  <nav class="tabs" role="tablist" id="tabs">
-    <button class="tab" role="tab" data-view="radar"     aria-selected="true">Radar</button>
-    <button class="tab" role="tab" data-view="timeline"  aria-selected="false">Zaman Çizelgesi</button>
-    <button class="tab" role="tab" data-view="diffusion" aria-selected="false">Çip Yayılımı</button>
-    <button class="tab" role="tab" data-view="accuracy"  aria-selected="false">Model Doğruluğu</button>
-    <button class="tab" role="tab" data-view="method"    aria-selected="false">Metodoloji</button>
-  </nav>
+
+  <div class="masthead__subnav">
+    <nav class="tabs" role="tablist" id="tabs">
+      <button class="tab" role="tab" data-view="radar"     aria-selected="true"><span class="tab__icon">📡</span> Radar</button>
+      <button class="tab" role="tab" data-view="timeline"  aria-selected="false"><span class="tab__icon">🗓️</span> Zaman Çizelgesi</button>
+      <button class="tab" role="tab" data-view="diffusion" aria-selected="false"><span class="tab__icon">⚡</span> Çip Yayılımı</button>
+      <button class="tab" role="tab" data-view="accuracy"  aria-selected="false"><span class="tab__icon">🎯</span> Model Doğruluğu</button>
+      <button class="tab" role="tab" data-view="method"    aria-selected="false"><span class="tab__icon">📑</span> Metodoloji</button>
+    </nav>
+  </div>
 </header>
 
 <main class="app" id="app">
@@ -52,3 +64,4 @@
 </noscript>
 </body>
 </html>
+
