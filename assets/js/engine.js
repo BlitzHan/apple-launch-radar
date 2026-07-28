@@ -455,6 +455,8 @@ export function predictFamily(familyId, ctx, { asOf = new Date() } = {}) {
   });
   const halfWidth = Math.max(10, Math.round((opt.bandK ?? DEFAULTS.bandK) * estimate.sigma));
   const daysAway = diffDays(estimate.date, asOf);
+  const lead = announceLead(all, opt.lambda);
+  if (lead.n) reasons.push(`Bu ürün geçmişte satıştan tipik olarak ${lead.lead} gün önce tanıtıldı.`);
   // Tahmin penceresi geçmişte kaldıysa gizlemek yerine "gecikmiş" olarak işaretle —
   // mağaza için "bu ürün yenilenmeyi geçti" bilgisi tahminin kendisi kadar değerli.
   if (daysAway < 0) {
@@ -477,6 +479,8 @@ export function predictFamily(familyId, ctx, { asOf = new Date() } = {}) {
     band: confidenceBand(score),
     daysAway,
     overdue: daysAway < 0,
+    announce: addDays(estimate.date, -lead.lead),
+    announceLead: lead.lead,
     lastRelease: last,
     daysSinceLast: diffDays(asOf, toDate(last.released)),
     cadence: cad,
@@ -494,6 +498,20 @@ export function predictAll(ctx, { asOf = new Date(), includeInactive = false } =
     .map((f) => predictFamily(f.id, ctx, { asOf }))
     .filter(Boolean)
     .sort((a, b) => a.date - b.date);
+}
+
+/**
+ * Duyuru → satış arası tipik gecikme (gün). Apple ürünü satıştan önce tanıtır;
+ * mağaza için tanıtım tarihi satış tarihinden daha erken bir hazırlık sinyali.
+ * Aykırı değerlere dayanıklı olsun diye ağırlıklı medyan kullanılır
+ * (Apple Watch Series 7'de bu süre 31 gündü, tipik değer 7–10 gün).
+ */
+export function announceLead(devices, lambda = DEFAULTS.lambda) {
+  const list = devices.filter((d) => !d.cadenceSkip);
+  if (!list.length) return { lead: 0, n: 0, leads: [] };
+  const leads = list.map((d) => diffDays(toDate(d.released), toDate(d.announced)));
+  const ws = decayWeights(leads.length, lambda);
+  return { lead: Math.round(weightedMedian(leads, ws)), n: leads.length, leads };
 }
 
 /* -------------------------------------------------- birlikte çıkan aileler */

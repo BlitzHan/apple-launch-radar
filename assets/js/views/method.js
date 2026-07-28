@@ -50,7 +50,18 @@ export function renderMethod(root, state) {
       'Bu yüzden model “en eski alınmamış nesil”i değil, gecikme eklendiğinde hâlâ gelecekte kalan en erken nesli hedefler. ',
       'Bu düzeltme Mac mini hatasını ', code('−203'), '\'ten ', code('+46 güne'), ' çekti.'),
 
-    h('5. Birlikte çıkan modellerin gruplanması'),
+    h('5. Tanıtım tarihi'),
+    p('Motor satış tarihini tahmin eder, ama mağaza için asıl erken sinyal ',
+      el('strong', {}, 'tanıtım'), ' tarihidir. Her aile için duyuru ile satış arasındaki ',
+      'gecikmenin ağırlıklı medyanı ölçülür ve satış tahmininden geriye sayılır:'),
+    el('div', { class: 'formula' }, 'tanıtım = satış − medyan(satış − duyuru)'),
+    p('Medyan kullanılır çünkü bu süre tekil olaylarda çok sapabiliyor — Apple Watch Series 7 ',
+      'satışa duyurudan 31 gün sonra çıkmıştı, tipik değer ise 7–10 gün.'),
+    p('Radar\'ın üst panelindeki "sıradaki lansman", tahmini tarihleri birbirinden 14 günden az ',
+      'ayrı düşen grupları tek etkinlikte toplar — Apple Eylül keynote\'unda hem iPhone hem Watch ',
+      'tanıtır, bunlar iki ayrı olay değildir.'),
+
+    h('6. Birlikte çıkan modellerin gruplanması'),
     p('iPhone 17, 17 Pro ve 17 Pro Max aynı gün satışa çıkar; bunları ayrı ayrı listelemek ',
       'aynı olayı üç kez göstermek olur. Radar ve zaman çizelgesi bu yüzden ürün ailesi değil ',
       el('strong', {}, 'lansman olayı'), ' gösterir. Gruplama elle yazılmaz, veriden çıkarılır:'),
@@ -71,7 +82,7 @@ export function renderMethod(root, state) {
       'Mac ve iPad\'de belirleyici olan çip nesli olduğu için oralarda ', code('MacBook Air (M6)'),
       ' biçimi kullanılır.'),
 
-    h('6. Birleştirme ve güven'),
+    h('7. Birleştirme ve güven'),
     p('Kadans tahmini ile çip yayılımı tahmini bağımsız iki kanaldır; ters-varyansla harmanlanır — ',
       'hangisi daha kesinse ona daha çok ağırlık verilir.'),
     formula(`T = (T_kadans/σ_k² + T_çip/σ_ç²) / (1/σ_k² + 1/σ_ç²)\nσ = √( 1 / (1/σ_k² + 1/σ_ç²) )`),
