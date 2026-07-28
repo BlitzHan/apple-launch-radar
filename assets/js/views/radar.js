@@ -149,7 +149,7 @@ function renderHero(events, index, state) {
       el('button', {
         class: 'hero__prod-link',
         onClick: () => (prod.launch ? openLaunch(prod.launch, state) : openFamily(prod.familyId, state)),
-      }, future ? 'gerekçe →' : 'geçmiş →')
+      }, future ? 'Gerekçe →' : 'Geçmiş →')
     )
   );
 
@@ -162,16 +162,28 @@ function renderHero(events, index, state) {
 
   return el('div', { class: `card hero${future ? '' : ' hero--past'}`,
       style: accentStyle(state.categories, future ? anchor.category : products[0].category) },
+    el('div', { class: 'hero__topbar' },
+      el('div', { class: 'hero__badge' },
+        el('span', { class: 'hero__badge-dot' }),
+        el('span', { class: 'hero__badge-text' }, future ? 'APPLE EVENT TAHMİNİ' : 'GERÇEKLEŞEN LANSMAN')
+      ),
+      el('div', { class: 'hero__controls' },
+        state.eventIndex !== null
+          ? el('button', {
+              class: 'hero__reset',
+              onClick: () => { state.eventIndex = null; state.render(); },
+            }, '↺ Sıradaki lansmana dön')
+          : null,
+        el('span', { class: 'hero__steps' },
+          nav(-1, '‹', 'Önceki lansman'),
+          el('span', { class: 'hero__count' }, `${index + 1} / ${events.length}`),
+          nav(1, '›', 'Sonraki lansman')
+        )
+      )
+    ),
     el('div', { class: 'hero__grid' },
       el('div', { class: 'hero__when' },
-        el('div', { class: 'hero__eyebrow' },
-          el('span', { class: 'stat__k' }, future ? 'Tahmini tanıtım' : 'Gerçekleşen tanıtım'),
-          el('span', { class: 'hero__steps' },
-            nav(-1, '‹', 'Önceki lansman'),
-            el('span', { class: 'hero__count' }, `${index + 1} / ${events.length}`),
-            nav(1, '›', 'Sonraki lansman')
-          )
-        ),
+        el('div', { class: 'stat__k' }, future ? 'Tahmini Tanıtım Tarihi' : 'Gerçekleşen Tanıtım Tarihi'),
         el('div', { class: 'hero__date' }, fmtLong(event.announce)),
         el('div', { class: 'hero__sale' },
           event.saleEnd
@@ -180,22 +192,16 @@ function renderHero(events, index, state) {
         ),
         el('div', { class: 'hero__row' },
           future ? confidenceBadge(anchor) : badge('Gerçekleşti', 'quiet'),
-          badge(fmtAway(away), future ? 'quiet' : 'quiet'),
+          badge(fmtAway(away), 'quiet'),
           event.lines > 1 ? badge(`${event.lines} ürün hattı`, 'quiet') : null
         ),
         future
           ? el('div', { class: 'hero__window' }, `Satış penceresi: ${fmtRange(anchor.low, anchor.high)}`)
-          : null,
-        state.eventIndex !== null
-          ? el('button', {
-              class: 'hero__reset',
-              onClick: () => { state.eventIndex = null; state.render(); },
-            }, '↺ sıradaki lansmana dön')
           : null
       ),
       el('div', { class: 'hero__products' },
         el('div', { class: 'stat__k' },
-          future ? `Tanıtılması beklenen ${products.length} model` : `Tanıtılan ${products.length} model`),
+          future ? `Tanıtılması Beklenen ${products.length} Model` : `Tanıtılan ${products.length} Model`),
         el('div', { class: 'hero__list' }, rows),
         el('p', { class: 'hero__note' }, note)
       )
