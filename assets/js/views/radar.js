@@ -232,12 +232,109 @@ function renderHero(events, index, state) {
 }
 
 /**
+ * Kategori Bazlı Ürün Döngüleri & Gelecek Tahmin Modülü.
+ * Sitenin temel amacını yanıtlar:
+ * "Hangi cihaz ne zaman çıktı, kaç ayda bir yenileniyor ve bir sonraki ne zaman gelecek?"
+ */
+function renderCategoryExplorer(state) {
+  const currentCat = state.activeCategoryTab || 'iphone';
+
+  const catTabs = el('div', { class: 'cat-explorer__tabs' },
+    state.categories.map((c) => el('button', {
+      class: `cat-explorer__tab${c.id === currentCat ? ' is-active' : ''}`,
+      style: c.id === currentCat ? `--accent:${c.color}` : '',
+      onClick: () => {
+        state.activeCategoryTab = c.id;
+        state.render();
+      },
+    },
+      el('span', { class: 'cat-explorer__dot', style: { background: c.color } }),
+      c.label
+    ))
+  );
+
+  const families = state.ctx.families.filter(
+    (f) => f.active && f.category === currentCat && state.matches(f)
+  );
+
+  const grid = el('div', { class: 'cat-explorer__grid' });
+
+  for (const f of families) {
+    const pred = predictFamily(f.id, state.ctx, { asOf: state.asOf });
+    if (!pred) continue;
+
+    const devices = state.ctx.byFamily.get(f.id) || [];
+    const nextName = expectedName(f, devices, pred);
+    const last = pred.lastRelease;
+
+    const avgDays = Math.round(pred.cadence.mean);
+    const avgMonths = Math.round(avgDays / 30.4);
+
+    const card = el('div', {
+      class: 'cat-card',
+      style: accentStyle(state.categories, f.category),
+      onClick: () => openFamily(f.id, state),
+    },
+      el('div', { class: 'cat-card__header' },
+        el('div', { class: 'cat-card__title-group' },
+          el('span', { class: 'cat-card__badge-cat' }, state.categories.find((c) => c.id === f.category)?.label),
+          el('h3', { class: 'cat-card__name' }, f.label)
+        ),
+        confidenceBadge(pred)
+      ),
+
+      el('div', { class: 'cat-card__metrics' },
+        // En Son Çıkan Model & Tarih
+        el('div', { class: 'cat-card__metric' },
+          el('span', { class: 'cat-card__label' }, 'En Son Ne Zaman Çıktı?'),
+          el('div', { class: 'cat-card__val' }, last.name),
+          el('span', { class: 'cat-card__sub' }, `${fmtLong(toDate(last.released))} (${pred.daysSinceLast} gün önce)`)
+        ),
+
+        // Yenilenme Döngüsü
+        el('div', { class: 'cat-card__metric' },
+          el('span', { class: 'cat-card__label' }, 'Ortalama Yenilenme Aralığı'),
+          el('div', { class: 'cat-card__val' }, `~${avgMonths} Ayda Bir`),
+          el('span', { class: 'cat-card__sub' }, `Geçmiş döngü: ${avgDays} gün (${pred.cadence.n} nesil verisi)`)
+        ),
+
+        // Bir Sonraki Çıkış Tahmini
+        el('div', { class: 'cat-card__metric cat-card__metric--next' },
+          el('span', { class: 'cat-card__label' }, 'Sıradaki Model & Tahmini Çıkış'),
+          el('div', { class: 'cat-card__val cat-card__val--highlight' }, nextName),
+          el('span', { class: 'cat-card__sub cat-card__sub--highlight' },
+            pred.overdue
+              ? `⚠️ Pencere Kapandı (${fmtAway(pred.daysAway)})`
+              : `🚀 Tahmini Lansman: ${fmtLong(pred.date)} (${fmtAway(pred.daysAway)})`
+          )
+        )
+      ),
+
+      el('div', { class: 'cat-card__footer' },
+        el('span', { class: 'cat-card__range' }, `Tahmini Satış Penceresi: ${fmtRange(pred.low, pred.high)}`),
+        el('button', { class: 'cat-card__link' }, 'Gerekçe & Detaylar →')
+      )
+    );
+
+    grid.append(card);
+  }
+
+  return el('div', { class: 'cat-explorer' },
+    el('div', { class: 'section-head' },
+      el('h2', {}, 'Ürün Döngüleri & Gelecek Tahminleri'),
+      el('p', {}, 'Hangi cihaz en son ne zaman çıktı, ortalama kaç ayda bir yenileniyor ve bir sonraki modeli ne zaman gelecek?')
+    ),
+    catTabs,
+    grid
+  );
+}
+
+/**
  * Apple Store & Keynote Standartlarında Lüks Akordeon Lansman Geçmişi.
  */
 function renderAccordionHistory(pastEvents, state) {
   if (!pastEvents.length) return null;
 
-  // En yeni gerçekleşen lansmandan geriye sırala
   const sortedPast = [...pastEvents].sort((a, b) => b.announce - a.announce);
 
   const list = el('div', { class: 'accordion-list' });
@@ -324,23 +421,11 @@ export function renderRadar(root, state) {
     ? firstFuture
     : Math.min(Math.max(state.eventIndex, 0), events.length - 1);
 
-  const overdue = launches.filter((l) => l.anchor.overdue).sort((a, b) => a.anchor.daysAway - b.anchor.daysAway);
-  const upcoming = launches.filter((l) => !l.anchor.overdue);
-  const within12 = upcoming.filter((l) => l.anchor.daysAway <= 400);
-  const models12 = within12.reduce((n, l) => n + l.preds.length, 0);
-
   // 1. Hero alanı (Tahmini Etkinlik & Kategori Seçicili)
   if (events.length) root.append(renderHero(events, index, state));
 
-  // 2. Stat özet kartları
-  root.append(
-    el('div', { class: 'radar-lede' },
-      stat('Gecikmiş', String(overdue.length), 'model penceresi kapandı'),
-      stat('12 ay içinde', String(within12.length), `lansman · ${models12} model`),
-      stat('En yakın', within12[0] ? fmtShort(within12[0].anchor.date) : '—', within12[0]?.title ?? ''),
-      stat('Yüksek güven', String(launches.filter((l) => l.anchor.band.id === 'high' && !l.anchor.overdue).length), '%70 üzeri')
-    )
-  );
+  // 2. Kategori Bazlı Ürün Döngüleri & Tahmin Modülü (iPhone / iPad / Mac / Watch)
+  root.append(renderCategoryExplorer(state));
 
   // 3. Apple Store standartlarında Lüks Gerçekleşen Lansman Geçmişi
   const pastEvents = events.filter((e) => e.kind === 'past');
