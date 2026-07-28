@@ -242,8 +242,8 @@ function renderAccordionHistory(pastEvents, state) {
 
   const list = el('div', { class: 'accordion-list' });
 
-  sortedPast.forEach((evt, idx) => {
-    let isOpen = idx === 0; // En son gerçekleşen lansman açık gelsin
+  sortedPast.forEach((evt) => {
+    let isOpen = false; // Tüm lansman geçmişi ilk başta kapalı/küçük gelsin
 
     const row = el('div', { class: `accordion-item${isOpen ? ' is-open' : ''}` });
 
