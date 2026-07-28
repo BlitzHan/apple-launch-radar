@@ -57,9 +57,20 @@ export function renderMethod(root, state) {
     el('div', { class: 'formula' }, 'tanıtım = satış − medyan(satış − duyuru)'),
     p('Medyan kullanılır çünkü bu süre tekil olaylarda çok sapabiliyor — Apple Watch Series 7 ',
       'satışa duyurudan 31 gün sonra çıkmıştı, tipik değer ise 7–10 gün.'),
-    p('Radar\'ın üst panelindeki "sıradaki lansman", tahmini tarihleri birbirinden 14 günden az ',
-      'ayrı düşen grupları tek etkinlikte toplar — Apple Eylül keynote\'unda hem iPhone hem Watch ',
-      'tanıtır, bunlar iki ayrı olay değildir.'),
+    p('Radar\'ın üst paneli lansmanları ', el('strong', {}, 'etkinlik'), ' olarak toplar ve ileri geri ',
+      'gezilebilir: geçmiş etkinlikler gerçek duyuru tarihlerinden, gelecekteler tahminlerden kurulur.'),
+    el('ul', {},
+      el('li', {}, el('strong', {}, 'Geçmiş — 7 günlük pencere. '),
+        'Bunlar kayıt olduğu için dar tutulur; Apple\'ın çok günlü duyuru dalgaları en fazla 3–4 gün ' +
+        'sürüyor (Mart 2026: 2, 3 ve 4 Mart). Daha geniş bir pencere iPhone 16e\'yi (19 Şub 2025) ' +
+        'ayrı bir duyuru olan Mart dalgasıyla birleştiriyordu.'),
+      el('li', {}, el('strong', {}, 'Gelecek — 14 günlük pencere. '),
+        'Bunlar tahmin olduğu için belirsizlik payı daha geniş bir pencereyi haklı çıkarır. ' +
+        'Apple Eylül keynote\'unda hem iPhone hem Watch tanıtır; bunlar iki ayrı olay değildir.'),
+    ),
+    p('Bir dalgadaki ürünler farklı günlerde satışa çıkabiliyor — Eylül 2022\'de Watch Ultra, ',
+      'aynı etkinlikteki diğerlerinden bir hafta sonra çıktı. Bu durumda tek tarih yerine ',
+      code('kademeli'), ' etiketiyle aralık gösterilir.'),
 
     h('6. Birlikte çıkan modellerin gruplanması'),
     p('iPhone 17, 17 Pro ve 17 Pro Max aynı gün satışa çıkar; bunları ayrı ayrı listelemek ',

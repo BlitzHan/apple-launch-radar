@@ -26,6 +26,9 @@ const state = {
   asOf: new Date(),
   ctx: null,
   groups: [],
+  // Hero panelinde gezilen lansman olayı. null = "sıradaki lansman"a dön.
+  // Filtre değişince sıfırlanır, çünkü olay listesinin uzunluğu değişir.
+  eventIndex: null,
   render,
   matches(family) {
     if (this.activeCategories.size && !this.activeCategories.has(family.category)) return false;
@@ -138,6 +141,7 @@ function buildFilters() {
         const on = state.activeCategories.has(c.id);
         on ? state.activeCategories.delete(c.id) : state.activeCategories.add(c.id);
         e.currentTarget.setAttribute('aria-pressed', String(!on));
+        state.eventIndex = null;
         render();
       },
     }, el('span', { class: 'chip__dot' }), c.label))
@@ -150,7 +154,7 @@ function buildFilters() {
   let t;
   search.addEventListener('input', () => {
     clearTimeout(t);
-    t = setTimeout(() => { state.query = search.value.trim(); render(); }, 140);
+    t = setTimeout(() => { state.query = search.value.trim(); state.eventIndex = null; render(); }, 140);
   });
   bar.append(search);
 }

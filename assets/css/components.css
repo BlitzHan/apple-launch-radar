@@ -10,6 +10,29 @@
   /* Model listesi uzun olduğunda sol sütun boş kalmasın diye dikeyde ortalanır. */
   display: flex; flex-direction: column; justify-content: center;
 }
+.hero--past { border-left-color: var(--text-faint); }
+.hero--past .hero__when { background: none; }
+
+.hero__eyebrow { display: flex; align-items: center; gap: 12px; justify-content: space-between; }
+.hero__steps { display: inline-flex; align-items: center; gap: 2px; }
+.hero__nav {
+  appearance: none; cursor: pointer; font: inherit; font-size: 15px; line-height: 1;
+  width: 26px; height: 26px; display: grid; place-items: center;
+  border: 1px solid var(--border); border-radius: 7px;
+  background: var(--surface); color: var(--text-dim);
+}
+.hero__nav:hover:not(:disabled) { color: var(--text); border-color: var(--text-faint); }
+.hero__nav:disabled { opacity: .3; cursor: default; }
+.hero__count {
+  font-size: 11px; color: var(--text-faint); font-variant-numeric: tabular-nums;
+  min-width: 46px; text-align: center;
+}
+.hero__reset {
+  appearance: none; border: 0; background: none; cursor: pointer; font: inherit;
+  font-size: 12px; color: var(--text-faint); padding: 0; margin-top: 12px; text-align: left;
+}
+.hero__reset:hover { color: var(--accent); }
+
 .hero__date { font-size: 30px; font-weight: 680; letter-spacing: -0.035em; margin-top: 4px; line-height: 1.12; }
 .hero__sale { font-size: 13px; color: var(--text-dim); margin-top: 6px; }
 .hero__row { display: flex; gap: 7px; flex-wrap: wrap; margin-top: 12px; }
