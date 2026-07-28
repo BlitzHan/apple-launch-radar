@@ -496,6 +496,89 @@ export function predictAll(ctx, { asOf = new Date(), includeInactive = false } =
     .sort((a, b) => a.date - b.date);
 }
 
+/* -------------------------------------------------- birlikte çıkan aileler */
+
+/**
+ * Aynı lansman olayında çıkan aileleri gruplar (iPhone 17 + 17 Pro + 17 Pro Max…).
+ * Kural elle yazılmaz, veriden çıkarılır:
+ *   • aynı kategoride olacaklar,
+ *   • sürüm tarihlerinin en az `minOverlap` oranı çakışacak (en az 2 ortak tarih;
+ *     tek nesli olan yeni ürünler o tek tarihle katılabilir),
+ *   • ve EN SON sürümleri de birlikte çıkmış olacak — böylece artık ayrışmış hatlar
+ *     (MacBook Pro baz M vs Pro/Max) yanlışlıkla birleştirilmez.
+ *
+ * @returns {Array<{id:string, members:object[]}>}
+ */
+export function coLaunchGroups(ctx, { minOverlap = 0.6, maxRecentGap = 14 } = {}) {
+  const fams = ctx.families.filter((f) => (ctx.byFamily.get(f.id) || []).length);
+
+  const parent = new Map(fams.map((f) => [f.id, f.id]));
+  const find = (x) => {
+    while (parent.get(x) !== x) {
+      parent.set(x, parent.get(parent.get(x)));
+      x = parent.get(x);
+    }
+    return x;
+  };
+  const union = (a, b) => {
+    const ra = find(a), rb = find(b);
+    if (ra !== rb) parent.set(ra, rb);
+  };
+
+  const datesOf = new Map(
+    fams.map((f) => [f.id, new Set((ctx.byFamily.get(f.id) || []).filter((d) => !d.cadenceSkip).map((d) => d.released))])
+  );
+  const lastOf = (id) => {
+    const list = ctx.byFamily.get(id);
+    return list[list.length - 1].released;
+  };
+
+  const compatible = (a, b) => {
+    if (a.category !== b.category) return false;
+    const A = datesOf.get(a.id), B = datesOf.get(b.id);
+    if (!A.size || !B.size) return false;
+    let shared = 0;
+    for (const d of A) if (B.has(d)) shared++;
+    if (!shared || shared / Math.min(A.size, B.size) < minOverlap) return false;
+    return Math.abs(diffDays(toDate(lastOf(a.id)), toDate(lastOf(b.id)))) <= maxRecentGap ? shared : false;
+  };
+
+  // 1. geçiş: yalnızca yerleşik aileler birleşir (en az 2 ortak tarih = istatistiksel dayanak).
+  const established = fams.filter((f) => datesOf.get(f.id).size >= 2);
+  for (let i = 0; i < established.length; i++) {
+    for (let j = i + 1; j < established.length; j++) {
+      if (compatible(established[i], established[j]) >= 2) union(established[i].id, established[j].id);
+    }
+  }
+
+  // 2. geçiş: tek nesilli yeni ürünler (iPhone Air) mevcut bir lansman OLAYINA katılır.
+  // İki kısıt var:
+  //   • Ayrı geçiş — tek veri noktasıyla iki yerleşik grubu köprüleyemesinler.
+  //   • Hedef grup zaten çok modelli olmalı — tek ortak tarihten yeni bir olay uydurmayalım.
+  //     (MacBook Neo, MacBook Air ile bir kez aynı gün çıktı; bu onları aynı olay yapmaz.)
+  const rootSize = new Map();
+  for (const f of established) rootSize.set(find(f.id), (rootSize.get(find(f.id)) || 0) + 1);
+
+  for (const f of fams) {
+    if (datesOf.get(f.id).size !== 1) continue;
+    const partner = established
+      .filter((e) => compatible(f, e) && (rootSize.get(find(e.id)) || 0) >= 2)
+      .sort((a, b) => datesOf.get(b.id).size - datesOf.get(a.id).size || a.order - b.order)[0];
+    if (partner) union(f.id, find(partner.id));
+  }
+
+  const byRoot = new Map();
+  for (const f of fams) {
+    const r = find(f.id);
+    if (!byRoot.has(r)) byRoot.set(r, []);
+    byRoot.get(r).push(f);
+  }
+  return [...byRoot.entries()].map(([id, members]) => ({
+    id,
+    members: members.sort((a, b) => a.order - b.order),
+  }));
+}
+
 /* ------------------------------------------------------------- backtest */
 
 /**

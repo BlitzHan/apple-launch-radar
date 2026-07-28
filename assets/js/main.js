@@ -1,4 +1,4 @@
-import { buildContext, DEFAULTS } from './engine.js';
+import { buildContext, coLaunchGroups, DEFAULTS } from './engine.js';
 import { el, clear, fmtLong } from './ui.js';
 import { renderRadar } from './views/radar.js';
 import { renderTimeline } from './views/timeline.js';
@@ -25,6 +25,7 @@ const state = {
   zoom: 0.42,
   asOf: new Date(),
   ctx: null,
+  groups: [],
   render,
   matches(family) {
     if (this.activeCategories.size && !this.activeCategories.has(family.category)) return false;
@@ -65,6 +66,13 @@ async function boot() {
   }
 
   state.ctx = buildContext(data, DEFAULTS);
+  // Birlikte çıkan aileler (iPhone 18 + Pro + Pro Max + Air) tek lansman sayılır.
+  const catOrder = new Map(state.categories.map((c) => [c.id, c.order]));
+  state.groups = coLaunchGroups(state.ctx).sort(
+    (a, b) =>
+      catOrder.get(a.members[0].category) - catOrder.get(b.members[0].category) ||
+      a.members[0].order - b.members[0].order
+  );
 
   document.getElementById('today').textContent = fmtLong(state.asOf);
   initTheme();

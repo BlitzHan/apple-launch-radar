@@ -12,8 +12,8 @@ ve modelin kendi doğruluğu sitede yayımlanır.
 
 | Sekme | Ne işe yarar |
 |---|---|
-| **Radar** | Önümüzdeki 12 ayın beklenen lansmanları, tarihe göre sıralı. Gecikmiş yenilemeler en üstte. |
-| **Zaman Çizelgesi** | 2020'den bugüne tüm sürümler + tahminler; ürün ailesi başına bir şerit, güven aralığı bandıyla. |
+| **Radar** | Önümüzdeki 12 ayın beklenen lansmanları, tarihe göre sıralı. Birlikte çıkan modeller (iPhone 18 + Pro + Pro Max + Air) tek satırda. Gecikmiş yenilemeler en üstte. |
+| **Zaman Çizelgesi** | 2020'den bugüne tüm sürümler + tahminler; lansman hattı başına bir şerit, güven aralığı bandıyla. |
 | **Çip Yayılımı** | Satır = ürün, kolon = çip nesli. "M5 önce 14″ MacBook Pro'ya, 140 gün sonra MacBook Air'e geldi." |
 | **Model Doğruluğu** | Geriye dönük sınama: model son sürümleri ne kadar isabetli tahmin ediyordu. |
 | **Metodoloji** | Formüllerin ve sınırların açık anlatımı. |
@@ -26,7 +26,8 @@ Beş katman, hepsi geçmiş tarihlerden türetiliyor:
 2. **Eğilim düzeltmesi** — Apple'ın yenileme döngüleri uzuyor; aralıklara doğru uydurulup ileri projekte ediliyor.
 3. **Mevsimsel oturtma** — Apple bir ürünü hep yılın aynı haftasında çıkarır; dairesel istatistikle hedef hafta bulunup tahmin oraya çekiliyor.
 4. **Çip yayılımı** — bir çip nesli piyasaya çıktıktan kaç gün sonra bu ürüne indiğinin ağırlıklı medyanı. Nesil atlamaları hesaba katılıyor.
-5. **Birleştirme** — kadans ve çip yayılımı ters-varyansla harmanlanıyor; güven skoru veri derinliği, tutarlılık ve iki kanalın uyumundan hesaplanıyor.
+5. **Lansman gruplama** — geçmişte hep aynı gün çıkan aileler tek olay sayılıyor (iPhone 18 + Pro + Pro Max + Air); kural elle yazılmıyor, tarih çakışmalarından çıkarılıyor. Ayrışmış hatlar (MacBook Pro baz M vs Pro/Max) ayrı kalıyor.
+6. **Birleştirme** — kadans ve çip yayılımı ters-varyansla harmanlanıyor; güven skoru veri derinliği, tutarlılık ve iki kanalın uyumundan hesaplanıyor.
 
 Ayrıntı ve formüller: sitedeki **Metodoloji** sekmesi.
 

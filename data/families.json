@@ -26,7 +26,7 @@
     { "id": "macbook-pro-13",     "category": "mac", "label": "MacBook Pro 13\"",         "short": "MBP 13",     "active": false, "chipAware": true, "order": 4, "note": "M2 ile sonlandı." },
     { "id": "macbook-neo",        "category": "mac", "label": "MacBook Neo",              "short": "Neo",        "active": true,  "chipAware": true, "order": 5, "note": "A-serisi çip kullanan ilk Mac. Tek nesil — tahmin zayıf." },
     { "id": "imac",               "category": "mac", "label": "iMac 24\"",                "short": "iMac",       "active": true,  "chipAware": true, "order": 6 },
-    { "id": "mac-mini",           "category": "mac", "label": "Mac mini",                 "short": "mini",       "active": true,  "chipAware": true, "order": 7 },
+    { "id": "mac-mini",           "category": "mac", "label": "Mac mini",                 "short": "Mac mini",   "active": true,  "chipAware": true, "order": 7 },
     { "id": "mac-studio",         "category": "mac", "label": "Mac Studio",               "short": "Studio",     "active": true,  "chipAware": true, "order": 8 },
     { "id": "mac-pro",            "category": "mac", "label": "Mac Pro",                  "short": "Mac Pro",    "active": true,  "chipAware": true, "order": 9, "note": "Tek Apple Silicon nesli — kadans hesaplanamıyor." },
 

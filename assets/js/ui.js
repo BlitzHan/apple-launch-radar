@@ -42,6 +42,63 @@ export function fmtAway(days) {
 
 export const plural = (n, word) => `${n} ${word}`;
 
+/* ------------------------------------------------------- isimlendirme */
+
+/**
+ * Bir sonraki sürümün beklenen adı.
+ * iPhone ve Watch pazarlamada model numarasıyla anılır (iPhone 17 → iPhone 18),
+ * Mac ve iPad ise çip nesliyle (MacBook Air (M6)). Bu ayrımı isimlendirme de izler.
+ */
+export function expectedName(family, devices, pred) {
+  const last = devices[devices.length - 1];
+  if (!last) return family.label;
+  if (family.category === 'iphone' || family.category === 'watch') return bumpName(last.name);
+
+  const gen = pred?.chip?.genKey;
+  if (!gen) return family.label;
+
+  // Aile adındaki sondaki parantez ya kademe bilgisidir (Pro/Max — korunur) ya da
+  // eskimiş çip bilgisidir (baz M — atılır), sonuna yeni çip nesli yazılır.
+  const m = family.label.match(/^(.*?)\s*\(([^)]*)\)\s*$/);
+  let base = family.label, tier = '';
+  if (m) {
+    base = m[1];
+    if (/pro|max|ultra/i.test(m[2]) && !/baz/i.test(m[2])) tier = ` ${m[2]}`;
+  }
+  return `${base} (${gen}${tier})`;
+}
+
+/** "iPhone 17 Pro" → "iPhone 18 Pro" · "Apple Watch SE (3. nesil)" → "(4. nesil)" */
+function bumpName(name) {
+  const m = name.match(/\d+/);
+  if (!m) return `${name} (2. nesil)`;
+  return name.slice(0, m.index) + (Number(m[0]) + 1) + name.slice(m.index + m[0].length);
+}
+
+/**
+ * Bir grup adın ortak gövdesi: kelime kelime, adların yarısından fazlasında
+ * aynı olan en uzun ön ek. ["iPhone 18","iPhone 18 Pro","iPhone Air 2"] → "iPhone 18".
+ */
+export function commonStem(names) {
+  if (names.length === 1) return names[0];
+  const words = names.map((n) => n.split(' '));
+  const stem = [];
+  for (let i = 0; ; i++) {
+    const counts = new Map();
+    for (const w of words) if (i < w.length) counts.set(w[i], (counts.get(w[i]) || 0) + 1);
+    if (!counts.size) break;
+    const [word, count] = [...counts].sort((a, b) => b[1] - a[1])[0];
+    if (count <= names.length / 2) break;
+    stem.push(word);
+  }
+  return stem.join(' ') || names[0];
+}
+
+/** Zaman çizelgesi kapsülü için kısa etiket: "iPhone 17 Pro" → "17", "iPhone 17e" → "17e" */
+export function modelToken(name) {
+  return name.split(' ').find((w) => /^\d/.test(w)) || null;
+}
+
 /* ------------------------------------------------------------- DOM */
 
 export function el(tag, props = {}, ...children) {

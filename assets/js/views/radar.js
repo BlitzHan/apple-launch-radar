@@ -1,23 +1,60 @@
-import { el, clear, stat, confidenceBadge, fmtLong, fmtRange, fmtAway, fmtShort, accentStyle } from '../ui.js';
-import { predictAll } from '../engine.js';
-import { openFamily } from './drawer.js';
+import { el, clear, stat, confidenceBadge, fmtLong, fmtRange, fmtAway, fmtShort, accentStyle, expectedName, commonStem } from '../ui.js';
+import { predictFamily } from '../engine.js';
+import { openLaunch } from './drawer.js';
+
+/**
+ * Radar, ürün ailesi değil LANSMAN OLAYI listeler. Aynı gün çıkan aileler
+ * (iPhone 18 + 18 Pro + 18 Pro Max + Air) tek kartta toplanır.
+ */
+export function buildLaunches(state) {
+  const out = [];
+  for (const group of state.groups) {
+    const members = group.members.filter((f) => f.active);
+    if (!members.length || !members.some((f) => state.matches(f))) continue;
+
+    const preds = members
+      .map((f) => predictFamily(f.id, state.ctx, { asOf: state.asOf }))
+      .filter(Boolean);
+    if (!preds.length) continue;
+
+    // Çapa = en çok kanıtı olan üye. Aynı olayı tahmin ettikleri için güven
+    // toplanmaz; en iyi geçmişe sahip üyenin güveni kullanılır.
+    const anchor = preds.slice().sort(
+      (a, b) => b.confidence - a.confidence || b.cadence.n - a.cadence.n
+    )[0];
+
+    const names = preds.map((p) =>
+      expectedName(p.family, state.ctx.byFamily.get(p.familyId) || [], p)
+    );
+
+    out.push({
+      id: group.id,
+      anchor,
+      preds,
+      names,
+      title: commonStem(names),
+      category: anchor.category,
+      familyIds: preds.map((p) => p.familyId),
+    });
+  }
+  return out.sort((a, b) => a.anchor.date - b.anchor.date);
+}
 
 export function renderRadar(root, state) {
   clear(root);
-  const preds = predictAll(state.ctx, { asOf: state.asOf, includeInactive: false })
-    .filter((p) => state.matches(p.family));
+  const launches = buildLaunches(state);
 
-  // Gecikmişler en üstte — mağaza için "her an çıkabilir" anlamına geliyor.
-  const overdue = preds.filter((p) => p.overdue).sort((a, b) => a.daysAway - b.daysAway);
-  const upcoming = preds.filter((p) => !p.overdue);
-  const within12 = upcoming.filter((p) => p.daysAway <= 400);
+  const overdue = launches.filter((l) => l.anchor.overdue).sort((a, b) => a.anchor.daysAway - b.anchor.daysAway);
+  const upcoming = launches.filter((l) => !l.anchor.overdue);
+  const within12 = upcoming.filter((l) => l.anchor.daysAway <= 400);
+  const models12 = within12.reduce((n, l) => n + l.preds.length, 0);
 
   root.append(
     el('div', { class: 'radar-lede' },
       stat('Gecikmiş', String(overdue.length), 'model penceresi kapandı'),
-      stat('12 ay içinde', String(within12.length), 'beklenen yenileme'),
-      stat('En yakın', within12[0] ? fmtShort(within12[0].date) : '—', within12[0]?.family.label ?? ''),
-      stat('Yüksek güven', String(preds.filter((p) => p.band.id === 'high' && !p.overdue).length), '%70 üzeri')
+      stat('12 ay içinde', String(within12.length), `lansman · ${models12} model`),
+      stat('En yakın', within12[0] ? fmtShort(within12[0].anchor.date) : '—', within12[0]?.title ?? ''),
+      stat('Yüksek güven', String(launches.filter((l) => l.anchor.band.id === 'high' && !l.anchor.overdue).length), '%70 üzeri')
     )
   );
 
@@ -27,53 +64,55 @@ export function renderRadar(root, state) {
         el('h2', {}, 'Gecikmiş yenilemeler'),
         el('p', {}, 'Beklenen pencere kapandı — bu ürünler her an duyurulabilir.')
       ),
-      el('div', { class: 'radar-list', style: { marginBottom: '28px' } }, overdue.map((p) => card(p, state)))
+      el('div', { class: 'radar-list', style: { marginBottom: '28px' } }, overdue.map((l) => card(l, state)))
     );
   }
 
   root.append(
     el('div', { class: 'section-head' },
       el('h2', {}, 'Önümüzdeki lansmanlar'),
-      el('p', {}, 'Tahmini satışa çıkış tarihine göre sıralı. Karta dokunarak gerekçeyi görün.')
-    )
-  );
-
-  root.append(
+      el('p', {}, 'Birlikte çıkması beklenen modeller tek satırda. Karta dokunarak gerekçeyi görün.')
+    ),
     upcoming.length
-      ? el('div', { class: 'radar-list' }, upcoming.map((p) => card(p, state)))
+      ? el('div', { class: 'radar-list' }, upcoming.map((l) => card(l, state)))
       : el('div', { class: 'card empty' }, 'Bu filtrelerle gösterilecek tahmin yok.')
   );
 }
 
-function card(pred, state) {
-  const soon = !pred.overdue && pred.daysAway <= 120;
-  const bits = [];
-  bits.push(`Son sürüm: ${pred.lastRelease.name} (${fmtShort(pred.lastRelease.released)})`);
-  bits.push(`${pred.daysSinceLast} gündür yenilenmedi`);
-  if (pred.chip) {
-    bits.push(pred.chip.projected
-      ? `${pred.chip.genKey} bekleniyor · +${pred.chip.medianLag}g yayılım`
-      : `${pred.chip.genKey} çıktı, henüz gelmedi`);
+function card(launch, state) {
+  const { anchor, preds, names } = launch;
+  const soon = !anchor.overdue && anchor.daysAway <= 120;
+  const multi = preds.length > 1;
+
+  const meta = [];
+  if (multi) meta.push(names.join(' · '));
+  const last = anchor.lastRelease;
+  meta.push(`Son: ${last.name} (${fmtShort(last.released)}) · ${anchor.daysSinceLast} gündür yenilenmedi`);
+  if (anchor.chip) {
+    meta.push(anchor.chip.projected
+      ? `${anchor.chip.genKey} bekleniyor · +${anchor.chip.medianLag}g yayılım`
+      : `${anchor.chip.genKey} çıktı, henüz gelmedi`);
   }
 
   return el('button', {
     class: `card rcard${soon ? ' rcard--soon' : ''}`,
-    style: accentStyle(state.categories, pred.category),
-    onClick: () => openFamily(pred.familyId, state),
+    style: accentStyle(state.categories, launch.category),
+    onClick: () => openLaunch(launch, state),
   },
     el('span', { class: 'rcard__rail' }),
     el('span', { class: 'rcard__body' },
       el('span', { class: 'rcard__title' },
-        el('span', { class: 'rcard__cat' }, state.categories.find((c) => c.id === pred.category)?.label),
-        el('span', { class: 'rcard__name' }, pred.family.label),
-        confidenceBadge(pred)
+        el('span', { class: 'rcard__cat' }, state.categories.find((c) => c.id === launch.category)?.label),
+        el('span', { class: 'rcard__name' }, launch.title),
+        multi ? el('span', { class: 'badge badge--quiet' }, `${preds.length} model`) : null,
+        confidenceBadge(anchor)
       ),
-      el('span', { class: 'rcard__meta' }, bits.join(' · '))
+      el('span', { class: 'rcard__meta' }, meta.join(' — '))
     ),
     el('span', { class: 'rcard__side' },
-      el('span', { class: 'rcard__when' }, fmtLong(pred.date)),
-      el('span', { class: 'rcard__away' }, fmtAway(pred.daysAway)),
-      el('span', { class: 'rcard__away' }, fmtRange(pred.low, pred.high))
+      el('span', { class: 'rcard__when' }, fmtLong(anchor.date)),
+      el('span', { class: 'rcard__away' }, fmtAway(anchor.daysAway)),
+      el('span', { class: 'rcard__away' }, fmtRange(anchor.low, anchor.high))
     )
   );
 }

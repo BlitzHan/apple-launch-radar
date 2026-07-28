@@ -50,7 +50,28 @@ export function renderMethod(root, state) {
       'Bu yüzden model “en eski alınmamış nesil”i değil, gecikme eklendiğinde hâlâ gelecekte kalan en erken nesli hedefler. ',
       'Bu düzeltme Mac mini hatasını ', code('−203'), '\'ten ', code('+46 güne'), ' çekti.'),
 
-    h('5. Birleştirme ve güven'),
+    h('5. Birlikte çıkan modellerin gruplanması'),
+    p('iPhone 17, 17 Pro ve 17 Pro Max aynı gün satışa çıkar; bunları ayrı ayrı listelemek ',
+      'aynı olayı üç kez göstermek olur. Radar ve zaman çizelgesi bu yüzden ürün ailesi değil ',
+      el('strong', {}, 'lansman olayı'), ' gösterir. Gruplama elle yazılmaz, veriden çıkarılır:'),
+    el('ul', {},
+      el('li', {}, 'Aileler aynı kategoride olacak.'),
+      el('li', {}, 'Sürüm tarihlerinin en az %60\'ı çakışacak ve en az iki ortak tarih bulunacak.'),
+      el('li', {}, el('strong', {}, 'En son sürümleri de birlikte çıkmış olacak. '),
+        'Bu kısıt, artık ayrışmış hatları yanlışlıkla birleştirmeyi önler: MacBook Pro\'nun baz M ' +
+        'modeli Ekim 2025\'te, Pro/Max modelleri Mart 2026\'da çıktı — eskiden birlikte çıksalar da ' +
+        'artık ayrı iki olaydır.'),
+      el('li', {}, 'Tek nesilli yeni bir ürün (iPhone Air) mevcut ve çok modelli bir olaya katılabilir, ' +
+        'ama tek ortak tarihten yeni bir olay uyduramaz ve iki yerleşik grubu birbirine bağlayamaz.'),
+    ),
+    p('Bir grubun tarihi ve güveni ', el('strong', {}, 'en çok geçmişi olan üyeden'), ' alınır. ',
+      'Üyeler aynı olayı tahmin ettiği için bağımsız kanıt sayılmaz — güvenler toplanmaz.'),
+    p(el('strong', {}, 'İsimlendirme: '), 'iPhone ve Watch pazarlamada model numarasıyla anılır, ',
+      'o yüzden tahmin ', code('iPhone 18'), ' / ', code('Apple Watch Series 12'), ' diye gösterilir. ',
+      'Mac ve iPad\'de belirleyici olan çip nesli olduğu için oralarda ', code('MacBook Air (M6)'),
+      ' biçimi kullanılır.'),
+
+    h('6. Birleştirme ve güven'),
     p('Kadans tahmini ile çip yayılımı tahmini bağımsız iki kanaldır; ters-varyansla harmanlanır — ',
       'hangisi daha kesinse ona daha çok ağırlık verilir.'),
     formula(`T = (T_kadans/σ_k² + T_çip/σ_ç²) / (1/σ_k² + 1/σ_ç²)\nσ = √( 1 / (1/σ_k² + 1/σ_ç²) )`),

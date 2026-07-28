@@ -1,5 +1,5 @@
-import { el, clear, fmtShort, fmtRange, fmtAway, accentStyle } from '../ui.js';
-import { predictFamily, toDate, toISO, diffDays, addDays } from '../engine.js';
+import { el, clear, fmtShort, fmtRange, fmtAway, accentStyle, expectedName, commonStem, modelToken } from '../ui.js';
+import { predictFamily, toDate, diffDays, addDays } from '../engine.js';
 import { openFamily } from './drawer.js';
 
 const LABEL_W = 190;
@@ -9,22 +9,54 @@ const START = '2020-01-01';
 export function renderTimeline(root, state) {
   clear(root);
 
-  const families = state.ctx.families.filter((f) => state.matches(f) && (state.ctx.byFamily.get(f.id) || []).length);
-  if (!families.length) {
-    root.append(el('div', { class: 'card empty' }, 'Bu filtrelerle gösterilecek ürün yok.'));
-    return;
+  // Her şerit bir LANSMAN HATTI: birlikte çıkan aileler tek şeritte toplanır,
+  // aynı gün çıkan modeller tek kapsül olur.
+  const lanes = [];
+  for (const group of state.groups) {
+    const members = group.members.filter((f) => state.matches(f));
+    if (!members.length) continue;
+    const devices = members.flatMap((f) => state.ctx.byFamily.get(f.id) || []);
+    if (!devices.length) continue;
+
+    const preds = members
+      .filter((f) => f.active)
+      .map((f) => predictFamily(f.id, state.ctx, { asOf: state.asOf }))
+      .filter(Boolean);
+    const anchor = preds.slice().sort((a, b) => b.confidence - a.confidence || b.cadence.n - a.cadence.n)[0] || null;
+
+    // Aynı tarihte çıkan modelleri tek kapsülde birleştir.
+    const byDate = new Map();
+    for (const d of devices) {
+      if (!byDate.has(d.released)) byDate.set(d.released, []);
+      byDate.get(d.released).push(d);
+    }
+
+    lanes.push({
+      id: group.id,
+      category: members[0].category,
+      // Grup adı tam etiketlerden türetilir: kısaltmalarda ortak gövde kalmaz
+      // (["Series","Ultra","SE"] → hiçbir şey; ["Apple Watch Series", …] → "Apple Watch").
+      label: members.length > 1
+        ? commonStem(members.map((f) => f.label))
+        : (members[0].short || members[0].label),
+      fullLabel: members.map((f) => f.label).join(' + '),
+      anchorFamilyId: (anchor ?? preds[0])?.familyId ?? members[0].id,
+      events: [...byDate.entries()].sort((a, b) => a[0].localeCompare(b[0])).map(([date, list]) => ({ date, list })),
+      pred: anchor,
+      predName: anchor ? expectedName(anchor.family, state.ctx.byFamily.get(anchor.familyId) || [], anchor) : null,
+      order: members[0].order,
+    });
   }
 
-  const preds = new Map();
-  for (const f of families) {
-    const p = predictFamily(f.id, state.ctx, { asOf: state.asOf });
-    if (p && f.active) preds.set(f.id, p);
+  if (!lanes.length) {
+    root.append(el('div', { class: 'card empty' }, 'Bu filtrelerle gösterilecek ürün yok.'));
+    return;
   }
 
   // Yatay ölçek: en geç tahmin + tampon
   const start = toDate(START);
   let end = addDays(state.asOf, 400);
-  for (const p of preds.values()) if (p.high > end) end = p.high;
+  for (const l of lanes) if (l.pred && l.pred.high > end) end = l.pred.high;
   end = addDays(end, 45);
 
   const totalDays = diffDays(end, start);
@@ -70,38 +102,43 @@ export function renderTimeline(root, state) {
 
   /* --- satırlar --- */
   const rows = el('div', { class: 'tl__rows' }, grid);
-  for (const f of families) {
-    const devices = state.ctx.byFamily.get(f.id) || [];
-    const pred = preds.get(f.id);
-    const row = el('div', { class: 'tl__row', style: accentStyle(state.categories, f.category) });
+  for (const lane of lanes) {
+    const row = el('div', { class: 'tl__row', style: accentStyle(state.categories, lane.category) });
+    const open = () => openFamily(lane.anchorFamilyId, state);
 
     row.append(el('div', { class: 'tl__label' },
-      el('i', {}), el('span', { title: f.label }, f.short || f.label)));
+      el('i', {}), el('span', { title: lane.fullLabel }, lane.label)));
 
-    for (const d of devices) {
-      const left = x(d.released);
+    for (const ev of lane.events) {
+      const skip = ev.list.every((d) => d.cadenceSkip);
       const pip = el('button', {
-        class: `tl__pip${d.cadenceSkip ? ' tl__pip--skip' : ''}`,
-        style: { left: `${left}px` },
-        'aria-label': `${d.name}, ${fmtShort(d.released)}`,
-        onClick: () => openFamily(f.id, state),
-      }, pxPerDay > 0.33 ? shortChip(d.chip) : '');
-      attachTip(pip, () => tipForDevice(d, devices));
+        class: `tl__pip${skip ? ' tl__pip--skip' : ''}`,
+        style: { left: `${x(ev.date)}px` },
+        'aria-label': `${ev.list.map((d) => d.name).join(', ')}, ${fmtShort(ev.date)}`,
+        onClick: open,
+      }, pxPerDay > 0.33 ? eventLabel(ev, lane.category) : '');
+      attachTip(pip, () => tipForEvent(ev, lane));
       row.append(pip);
     }
 
-    if (pred) {
-      const bl = x(pred.low), bw = Math.max(6, x(pred.high) - bl);
+    if (lane.pred) {
+      const p = lane.pred;
+      const bl = x(p.low), bw = Math.max(6, x(p.high) - bl);
       row.append(el('div', { class: 'tl__band', style: { left: `${bl}px`, width: `${bw}px` } }));
-      const pl = x(pred.date);
-      const label = pred.chip?.genKey ?? nextChipLabel(devices, state.ctx);
+      // Model numarası yalnızca iPhone/Watch'ta anlamlı; Mac ve iPad adlarındaki sayı
+      // ekran boyutudur ("MacBook Pro 14\"") — oralarda çip nesli gösterilir.
+      const byModel = lane.category === 'iphone' || lane.category === 'watch';
+      const label =
+        (byModel ? modelToken(lane.predName ?? '') : null) ??
+        p.chip?.genKey ??
+        nextChipLabel(state.ctx.byFamily.get(p.familyId) || [], state.ctx);
       const chip = el('button', {
-        class: `tl__pred${pred.overdue ? ' tl__pred--overdue' : ''}`,
-        style: { left: `${pl}px`, transform: 'translate(-50%, -50%)', padding: '0 7px' },
-        'aria-label': `${f.label} tahmini: ${fmtShort(pred.date)}`,
-        onClick: () => openFamily(f.id, state),
+        class: `tl__pred${p.overdue ? ' tl__pred--overdue' : ''}`,
+        style: { left: `${x(p.date)}px`, transform: 'translate(-50%, -50%)', padding: '0 7px' },
+        'aria-label': `${lane.predName} tahmini: ${fmtShort(p.date)}`,
+        onClick: open,
       }, pxPerDay > 0.33 ? label : '');
-      attachTip(chip, () => tipForPrediction(f, pred));
+      attachTip(chip, () => tipForPrediction(lane));
       row.append(chip);
     }
 
@@ -164,28 +201,39 @@ function attachTip(node, build) {
   node.addEventListener('focus', () => { tip.hidden = true; });
 }
 
-function tipForDevice(d, all) {
-  const idx = all.indexOf(d);
-  const prev = all.slice(0, idx).filter((p) => !p.cadenceSkip).pop();
-  const gap = prev ? diffDays(toDate(d.released), toDate(prev.released)) : null;
-  const lead = diffDays(toDate(d.released), toDate(d.announced));
+/** Kapsül etiketi: iPhone'da model numarası (17), diğerlerinde çip kısaltması. */
+function eventLabel(ev, category) {
+  if (category === 'iphone') {
+    const token = modelToken(commonStem(ev.list.map((d) => d.name)));
+    if (token) return token;
+  }
+  return shortChip(ev.list[0].chip);
+}
+
+function tipForEvent(ev, lane) {
+  const idx = lane.events.indexOf(ev);
+  const prev = lane.events.slice(0, idx).filter((e) => !e.list.every((d) => d.cadenceSkip)).pop();
+  const gap = prev ? diffDays(toDate(ev.date), toDate(prev.date)) : null;
+  const lead = diffDays(toDate(ev.date), toDate(ev.list[0].announced));
+  const chips = [...new Set(ev.list.map((d) => d.chip))];
   return [
-    el('strong', {}, d.name),
-    el('div', {}, `Satış: ${fmtShort(d.released)}`),
-    el('div', {}, `Duyuru: ${fmtShort(d.announced)}${lead ? ` (${lead} gün önce)` : ' (aynı gün)'}`),
-    el('div', {}, `Çip: ${d.chip}`),
+    el('strong', {}, ev.list.map((d) => d.name).join(', ')),
+    el('div', {}, `Satış: ${fmtShort(ev.date)}`),
+    el('div', {}, `Duyuru: ${fmtShort(ev.list[0].announced)}${lead ? ` (${lead} gün önce)` : ' (aynı gün)'}`),
+    el('div', {}, `Çip: ${chips.join(' / ')}`),
     gap ? el('div', {}, `Önceki nesilden ${gap} gün sonra`) : null,
-    d.cadenceSkip ? el('div', { class: 'faint' }, 'Kadans hesabına dahil değil') : null,
+    ev.list.every((d) => d.cadenceSkip) ? el('div', { class: 'faint' }, 'Kadans hesabına dahil değil') : null,
   ].filter(Boolean);
 }
 
-function tipForPrediction(family, pred) {
+function tipForPrediction(lane) {
+  const p = lane.pred;
   return [
-    el('strong', {}, `${family.label} — tahmin`),
-    el('div', {}, fmtShort(pred.date)),
-    el('div', {}, `Pencere: ${fmtRange(pred.low, pred.high)}`),
-    el('div', {}, `Güven: ${pred.band.label} (%${pred.confidence})`),
-    el('div', {}, pred.overdue ? `Pencere ${Math.abs(pred.daysAway)} gün önce kapandı` : fmtAway(pred.daysAway)),
-    pred.chip ? el('div', {}, `${pred.chip.genKey}${pred.chip.projected ? ' (öngörülen)' : ''} · +${pred.chip.medianLag}g`) : null,
+    el('strong', {}, `${lane.predName} — tahmin`),
+    el('div', {}, fmtShort(p.date)),
+    el('div', {}, `Pencere: ${fmtRange(p.low, p.high)}`),
+    el('div', {}, `Güven: ${p.band.label} (%${p.confidence})`),
+    el('div', {}, p.overdue ? `Pencere ${Math.abs(p.daysAway)} gün önce kapandı` : fmtAway(p.daysAway)),
+    p.chip ? el('div', {}, `${p.chip.genKey}${p.chip.projected ? ' (öngörülen)' : ''} · +${p.chip.medianLag}g`) : null,
   ].filter(Boolean);
 }
