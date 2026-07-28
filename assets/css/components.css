@@ -366,7 +366,7 @@
   .hero__cat-selector { order: 3; width: 100%; margin-top: 4px; }
 }
 
-/* ---------------------------------------------------------- Accordion Past History */
+/* ---------------------------------------------------------- Accordion Past History (Apple Keynote Style) */
 .history-section {
   margin-top: 48px;
 }
@@ -374,7 +374,7 @@
 .accordion-list {
   display: flex;
   flex-direction: column;
-  gap: 8px;
+  gap: 12px;
 }
 
 .accordion-item {
@@ -382,10 +382,14 @@
   background: var(--surface);
   border: 1px solid var(--border);
   overflow: hidden;
-  transition: border-color 0.2s var(--ease);
+  transition: all 0.25s var(--ease);
 }
 .accordion-item:hover {
+  border-color: color-mix(in oklab, var(--text-dim) 30%, var(--border));
+}
+.accordion-item.is-open {
   border-color: var(--border-soft);
+  box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
 }
 
 .accordion-header {
@@ -394,7 +398,7 @@
   border: 0;
   background: transparent;
   cursor: pointer;
-  padding: 16px 20px;
+  padding: 18px 24px;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -402,19 +406,30 @@
   text-align: left;
   font-family: var(--sans);
   color: inherit;
+  transition: background 0.2s var(--ease);
+}
+.accordion-header:hover {
+  background: color-mix(in oklab, var(--surface-2) 40%, transparent);
 }
 
 .accordion-left {
   display: flex;
   align-items: center;
-  gap: 16px;
+  gap: 14px;
   flex-wrap: wrap;
   min-width: 0;
 }
 
+.accordion-apple-icon {
+  font-size: 16px;
+  color: var(--text-dim);
+  line-height: 1;
+}
+
 .accordion-date {
-  font-size: 15px;
+  font-size: 16px;
   font-weight: 600;
+  letter-spacing: -0.015em;
   color: var(--text);
   white-space: nowrap;
 }
@@ -426,32 +441,64 @@
   flex-wrap: wrap;
 }
 
+.accordion-tag {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11.5px;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: color-mix(in oklab, var(--accent, var(--text-faint)) 10%, var(--surface-2));
+  color: var(--text);
+  border: 1px solid color-mix(in oklab, var(--accent, var(--text-faint)) 20%, transparent);
+}
+
+.accordion-tag-dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--accent, var(--text-faint));
+}
+
+.accordion-tag-more {
+  font-size: 11px;
+  color: var(--text-faint);
+  padding: 2px 6px;
+}
+
 .accordion-right {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: 12px;
   flex-shrink: 0;
 }
 
 .accordion-count {
-  font-size: 12.5px;
-  color: var(--text-faint);
+  font-size: 12px;
+  font-weight: 500;
+  color: var(--text-dim);
+  padding: 3px 10px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  border: 1px solid var(--border-soft);
 }
 
 .accordion-chevron {
-  font-size: 16px;
+  font-size: 18px;
   color: var(--text-faint);
   transition: transform 0.25s var(--ease);
 }
 .accordion-item.is-open .accordion-chevron {
   transform: rotate(90deg);
+  color: var(--text);
 }
 
 .accordion-body {
   display: grid;
   grid-template-rows: 0fr;
   transition: grid-template-rows 0.3s var(--ease);
-  background: color-mix(in oklab, var(--surface-2) 30%, transparent);
+  background: color-mix(in oklab, var(--surface-2) 20%, transparent);
 }
 .accordion-item.is-open .accordion-body {
   grid-template-rows: 1fr;
@@ -463,31 +510,64 @@
 }
 
 .accordion-grid {
-  padding: 16px 20px;
+  padding: 20px 24px;
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-  gap: 10px;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 12px;
 }
 
-.accordion-prod {
-  padding: 10px 14px;
+.accordion-prod-card {
+  padding: 14px 16px;
   border-radius: var(--radius-sm);
   background: var(--surface);
   border: 1px solid var(--border-soft);
+  cursor: pointer;
+  transition: all 0.2s var(--ease);
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.accordion-prod-card:hover {
+  border-color: var(--accent, var(--iphone));
+  background: color-mix(in oklab, var(--accent, var(--iphone)) 6%, var(--surface));
+  transform: translateY(-1px);
+}
+
+.accordion-prod-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
 }
 
 .accordion-prod-name {
-  font-size: 14px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--text);
+  letter-spacing: -0.015em;
 }
 
-.accordion-prod-detail {
+.accordion-prod-chip {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-2);
+  color: var(--text-dim);
+  border: 1px solid var(--border-soft);
+}
+
+.accordion-prod-bottom {
   display: flex;
+  align-items: center;
   justify-content: space-between;
   font-size: 11.5px;
-  color: var(--text-dim);
-  margin-top: 4px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.accordion-prod-lead {
+  color: var(--iphone);
 }
 
 /* ---------------------------------------------------------- Excel Chip & Model Matrix */
