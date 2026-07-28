@@ -1,45 +1,60 @@
-/* ---------------------------------------------------------- Apple Design System Tokens */
+/* ============================================================
+   Apple Launch Radar — Base Design System
+   Inspired by apple.com's design language
+   ============================================================ */
+
 :root {
   color-scheme: dark;
+
+  /* Core palette — true black, Apple dark mode */
   --bg: #000000;
-  --bg-elev: #161617;
+  --bg-elev: #1c1c1e;
   --surface: #1c1c1e;
   --surface-2: #2c2c2e;
-  --border: rgba(255, 255, 255, 0.12);
-  --border-soft: rgba(255, 255, 255, 0.06);
+  --border: rgba(255, 255, 255, 0.08);
+  --border-soft: rgba(255, 255, 255, 0.04);
   --text: #f5f5f7;
-  --text-dim: #a1a1a6;
+  --text-dim: #86868b;
   --text-faint: #6e6e73;
 
+  /* Category accent colors */
   --iphone: #2997ff;
   --ipad: #bf5af2;
   --mac: #f56300;
   --watch: #30d158;
 
+  /* Confidence / status */
   --high: #30d158;
   --mid: #ffd60a;
   --low: #ff453a;
   --overdue: #ff3b30;
 
-  --radius-lg: 24px;
-  --radius: 18px;
-  --radius-sm: 10px;
-  --radius-pill: 9999px;
-  --shadow: 0 12px 36px rgba(0, 0, 0, 0.55);
-  --shadow-subtle: 0 4px 16px rgba(0, 0, 0, 0.25);
-  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+  /* Radii */
+  --radius-lg: 20px;
+  --radius: 16px;
+  --radius-sm: 12px;
+  --radius-pill: 980px;
+
+  /* Shadows — minimal in dark */
+  --shadow: none;
+  --shadow-subtle: none;
+
+  /* Type stacks */
   --sans: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Helvetica Neue", Helvetica, Arial, sans-serif;
-  --ease-apple: cubic-bezier(0.25, 1, 0.5, 1);
+  --mono: ui-monospace, "SF Mono", SFMono-Regular, Menlo, monospace;
+
+  /* Motion */
+  --ease: cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
 :root[data-theme='light'] {
   color-scheme: light;
-  --bg: #f5f5f7;
+  --bg: #fbfbfd;
   --bg-elev: #ffffff;
   --surface: #ffffff;
-  --surface-2: #e8e8ed;
-  --border: rgba(0, 0, 0, 0.08);
-  --border-soft: rgba(0, 0, 0, 0.04);
+  --surface-2: #f5f5f7;
+  --border: rgba(0, 0, 0, 0.06);
+  --border-soft: rgba(0, 0, 0, 0.03);
   --text: #1d1d1f;
   --text-dim: #515154;
   --text-faint: #86868b;
@@ -49,11 +64,12 @@
   --mac: #e36414;
   --watch: #28a745;
 
-  --shadow: 0 8px 30px rgba(0, 0, 0, 0.08);
-  --shadow-subtle: 0 2px 10px rgba(0, 0, 0, 0.04);
+  --shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  --shadow-subtle: 0 2px 8px rgba(0, 0, 0, 0.04);
 }
 
-* { box-sizing: border-box; }
+/* ---------------------------------------------------------- Reset */
+*, *::before, *::after { box-sizing: border-box; }
 
 html { -webkit-text-size-adjust: 100%; scroll-behavior: smooth; }
 
@@ -62,9 +78,9 @@ body {
   background: var(--bg);
   color: var(--text);
   font-family: var(--sans);
-  font-size: 15px;
+  font-size: 17px;
   line-height: 1.47059;
-  letter-spacing: -0.016em;
+  letter-spacing: -0.022em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -74,161 +90,155 @@ body {
 
 :focus-visible {
   outline: 2px solid var(--iphone);
-  outline-offset: 3px;
-  border-radius: 8px;
+  outline-offset: 2px;
+  border-radius: 6px;
 }
 
+/* ---------------------------------------------------------- App Container */
 .app {
-  max-width: 1140px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 28px 24px 96px;
+  padding: 36px 22px 80px;
 }
 
-/* ---------------------------------------------------------- Apple Header Navigation */
+/* ---------------------------------------------------------- Masthead: Apple Global Nav */
 .masthead {
   position: sticky;
   top: 0;
   z-index: 50;
-  background: color-mix(in oklab, var(--bg) 85%, transparent);
+}
+
+/* Top bar — 44px, pure black */
+.masthead__global {
+  height: 44px;
+  background: rgba(0, 0, 0, 0.92);
   backdrop-filter: saturate(180%) blur(20px);
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: 1px solid var(--border-soft);
 }
 
-.masthead__global {
-  border-bottom: 1px solid var(--border-soft);
+:root[data-theme='light'] .masthead__global {
+  background: rgba(251, 251, 253, 0.92);
 }
 
 .masthead__global-inner {
   display: flex;
   align-items: center;
-  gap: 16px;
-  max-width: 1140px;
+  max-width: 980px;
   margin: 0 auto;
-  padding: 12px 24px;
+  padding: 0 22px;
+  height: 100%;
 }
 
+/* Brand */
 .brand {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
 }
 
 .apple-logo {
-  font-size: 22px;
+  font-size: 18px;
   line-height: 1;
-  color: var(--text);
-  font-family: var(--sans);
+  opacity: 0.85;
 }
 
 .brand__text h1 {
-  font-size: 17px;
+  font-size: 21px;
   font-weight: 600;
-  letter-spacing: -0.022em;
+  letter-spacing: -0.024em;
   color: var(--text);
-  line-height: 1.2;
+  line-height: 1;
 }
 
-.brand__tagline {
-  font-size: 12px;
-  color: var(--text-faint);
-  display: block;
-  letter-spacing: -0.01em;
-}
+.brand__tagline { display: none; }
 
 .masthead__spacer { flex: 1; }
 
 .masthead__actions {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 14px;
 }
 
+/* Date — just plain text */
 .today {
   font-size: 12px;
-  font-weight: 500;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
-  padding: 5px 13px;
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  background: var(--surface);
-  box-shadow: var(--shadow-subtle);
 }
 
+/* Theme toggle */
 .icon-btn {
   appearance: none;
   cursor: pointer;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-pill);
-  width: 34px;
-  height: 34px;
+  background: transparent;
+  border: 0;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
   display: grid;
   place-items: center;
-  color: var(--text-dim);
-  transition: all 0.2s var(--ease-apple);
+  color: var(--text-faint);
+  transition: color 0.3s var(--ease), background 0.3s var(--ease);
 }
 .icon-btn:hover {
   color: var(--text);
-  border-color: var(--text-dim);
-  transform: scale(1.05);
+  background: var(--surface-2);
 }
 
-/* Sub-nav tab bar */
+/* Sub-nav tab bar — 52px */
 .masthead__subnav {
-  max-width: 1140px;
-  margin: 0 auto;
-  padding: 0 24px;
+  height: 52px;
+  background: var(--bg);
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  justify-content: center;
+}
+
+:root[data-theme='light'] .masthead__subnav {
+  background: var(--bg);
 }
 
 .tabs {
   display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  padding: 8px 0;
-  scrollbar-width: none;
+  align-items: stretch;
+  gap: 32px;
+  height: 100%;
 }
-.tabs::-webkit-scrollbar { display: none; }
 
 .tab {
   appearance: none;
   background: transparent;
   border: 0;
+  border-bottom: 2px solid transparent;
   cursor: pointer;
   font-family: var(--sans);
-  font-size: 13.5px;
-  font-weight: 500;
+  font-size: 12px;
+  font-weight: 400;
   color: var(--text-dim);
-  padding: 7px 16px;
-  border-radius: var(--radius-pill);
-  white-space: nowrap;
-  transition: all 0.2s var(--ease-apple);
-  display: inline-flex;
+  padding: 0;
+  display: flex;
   align-items: center;
-  gap: 6px;
+  white-space: nowrap;
+  transition: color 0.3s var(--ease), border-color 0.3s var(--ease);
 }
-.tab__icon { font-size: 14px; opacity: 0.85; }
 .tab:hover {
   color: var(--text);
-  background: var(--surface);
 }
 .tab[aria-selected='true'] {
   color: var(--text);
-  background: var(--surface-2);
   font-weight: 600;
-  box-shadow: var(--shadow-subtle);
+  border-bottom-color: var(--iphone);
 }
 
 /* ---------------------------------------------------------- Filters & Search */
 .filters {
   display: flex;
   flex-wrap: wrap;
-  gap: 12px;
+  gap: 10px;
   align-items: center;
   margin-bottom: 28px;
-  padding: 4px 0;
 }
 .filters[hidden] { display: none; }
 
@@ -242,55 +252,53 @@ body {
   appearance: none;
   cursor: pointer;
   font-family: var(--sans);
-  font-size: 13px;
+  font-size: 12px;
   font-weight: 500;
-  padding: 6px 14px;
+  height: 30px;
+  padding: 0 14px;
   border-radius: var(--radius-pill);
   border: 1px solid var(--border);
-  background: var(--surface);
+  background: transparent;
   color: var(--text-dim);
   display: inline-flex;
   align-items: center;
-  gap: 7px;
-  transition: all 0.2s var(--ease-apple);
+  gap: 6px;
+  transition: all 0.3s var(--ease);
 }
 .chip:hover {
   color: var(--text);
-  border-color: var(--text-dim);
+  border-color: var(--text-faint);
 }
 .chip[aria-pressed='true'] {
-  background: var(--surface-2);
-  color: var(--text);
-  border-color: var(--accent, var(--text));
-  font-weight: 600;
-  box-shadow: 0 0 12px color-mix(in oklab, var(--accent, var(--text)) 25%, transparent);
+  background: color-mix(in oklab, var(--accent, var(--text-faint)) 12%, transparent);
+  color: var(--accent, var(--text));
+  border-color: color-mix(in oklab, var(--accent, var(--text-faint)) 40%, transparent);
 }
 .chip__dot {
-  width: 8px;
-  height: 8px;
+  width: 6px;
+  height: 6px;
   border-radius: 50%;
   background: var(--accent, var(--text-faint));
-  box-shadow: 0 0 6px var(--accent, var(--text-faint));
 }
-.chip--sm { font-size: 12px; padding: 4px 10px; }
+.chip--sm { font-size: 11px; padding: 0 10px; height: 26px; }
 
 .search {
   flex: 1;
-  min-width: 180px;
-  max-width: 280px;
+  min-width: 140px;
+  max-width: 240px;
   font-family: var(--sans);
-  font-size: 13.5px;
-  padding: 7px 14px 7px 34px;
+  font-size: 13px;
+  height: 34px;
+  padding: 0 16px;
   border: 1px solid var(--border);
   border-radius: var(--radius-pill);
-  background: var(--surface) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%23a1a1a6' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Ccircle cx='11' cy='11' r='8'%3E%3C/circle%3E%3Cline x1='21' y1='21' x2='16.65' y2='16.65'%3E%3C/line%3E%3C/svg%3E") no-repeat 12px center;
+  background: transparent;
   color: var(--text);
-  transition: all 0.2s var(--ease-apple);
+  transition: border-color 0.3s var(--ease);
 }
 .search:focus {
   outline: none;
   border-color: var(--iphone);
-  box-shadow: 0 0 0 3px color-mix(in oklab, var(--iphone) 20%, transparent);
 }
 .search::placeholder { color: var(--text-faint); }
 
@@ -300,7 +308,6 @@ body {
   border: 1px solid var(--border);
   border-radius: var(--radius);
   box-shadow: var(--shadow-subtle);
-  transition: all 0.25s var(--ease-apple);
 }
 
 .section-head {
@@ -308,52 +315,51 @@ body {
   align-items: baseline;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 16px;
-  margin-top: 36px;
+  margin-bottom: 20px;
+  margin-top: 40px;
 }
 .section-head:first-child { margin-top: 0; }
 .section-head h2 {
-  font-size: 21px;
-  font-weight: 600;
-  letter-spacing: -0.022em;
+  font-size: 28px;
+  font-weight: 700;
+  letter-spacing: -0.03em;
   color: var(--text);
 }
 .section-head p {
-  font-size: 13.5px;
+  font-size: 14px;
   color: var(--text-dim);
 }
 
 .badge {
   display: inline-flex;
   align-items: center;
-  gap: 6px;
-  font-size: 11.5px;
-  font-weight: 600;
+  gap: 5px;
+  font-size: 12px;
+  font-weight: 500;
   padding: 3px 10px;
   border-radius: var(--radius-pill);
   border: 1px solid transparent;
   white-space: nowrap;
-  letter-spacing: -0.01em;
 }
 .badge--high {
   color: var(--high);
-  background: color-mix(in oklab, var(--high) 12%, transparent);
-  border-color: color-mix(in oklab, var(--high) 25%, transparent);
+  background: color-mix(in oklab, var(--high) 10%, transparent);
+  border-color: color-mix(in oklab, var(--high) 20%, transparent);
 }
 .badge--mid {
   color: var(--mid);
-  background: color-mix(in oklab, var(--mid) 12%, transparent);
-  border-color: color-mix(in oklab, var(--mid) 25%, transparent);
+  background: color-mix(in oklab, var(--mid) 10%, transparent);
+  border-color: color-mix(in oklab, var(--mid) 20%, transparent);
 }
 .badge--low {
   color: var(--low);
-  background: color-mix(in oklab, var(--low) 12%, transparent);
-  border-color: color-mix(in oklab, var(--low) 25%, transparent);
+  background: color-mix(in oklab, var(--low) 10%, transparent);
+  border-color: color-mix(in oklab, var(--low) 20%, transparent);
 }
 .badge--overdue {
   color: var(--overdue);
-  background: color-mix(in oklab, var(--overdue) 14%, transparent);
-  border-color: color-mix(in oklab, var(--overdue) 30%, transparent);
+  background: color-mix(in oklab, var(--overdue) 10%, transparent);
+  border-color: color-mix(in oklab, var(--overdue) 20%, transparent);
 }
 .badge--quiet {
   color: var(--text-dim);
@@ -368,11 +374,10 @@ body {
   padding: 48px 24px;
   text-align: center;
   color: var(--text-faint);
-  font-size: 14.5px;
+  font-size: 15px;
   border-radius: var(--radius);
   background: var(--surface);
   border: 1px dashed var(--border);
 }
 
 .view[hidden] { display: none; }
-

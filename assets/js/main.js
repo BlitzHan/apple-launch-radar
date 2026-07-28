@@ -3,18 +3,56 @@ import { el, clear, fmtLong } from './ui.js';
 import { renderRadar } from './views/radar.js';
 import { renderTimeline } from './views/timeline.js';
 import { renderDiffusion } from './views/diffusion.js';
-import { renderAccuracy } from './views/accuracy.js';
-import { renderMethod } from './views/method.js';
 import { initDrawer, close as closeDrawer } from './views/drawer.js';
 
 const VIEWS = {
   radar: renderRadar,
   timeline: renderTimeline,
   diffusion: renderDiffusion,
-  accuracy: renderAccuracy,
-  method: renderMethod,
 };
 const FILTERED_VIEWS = new Set(['radar', 'timeline', 'diffusion']);
+
+/**
+ * Kullanıcının belirlediği ürün ailesi gösterim sırası.
+ * iPhone > iPad Pro > iPad Air > iPad > iPad mini > Watch > MacBook Pro > MacBook Air > MacBook Neo > iMac > Mac mini > Mac Studio
+ */
+const FAMILY_DISPLAY_ORDER = new Map([
+  // iPhone ailesi
+  ['iphone-base', 1],
+  ['iphone-pro', 2],
+  ['iphone-promax', 3],
+  ['iphone-air', 4],
+  ['iphone-plus', 5],
+  ['iphone-mini', 6],
+  ['iphone-e', 7],
+  // iPad ailesi — Pro önce
+  ['ipad-pro', 10],
+  ['ipad-air', 11],
+  ['ipad-base', 12],
+  ['ipad-mini', 13],
+  // Watch ailesi
+  ['watch-ultra', 20],
+  ['watch-series', 21],
+  ['watch-se', 22],
+  // Mac ailesi — MacBook Pro önce
+  ['macbook-pro-base', 30],
+  ['macbook-pro-promax', 31],
+  ['macbook-pro-13', 32],
+  ['macbook-air', 33],
+  ['macbook-neo', 34],
+  ['imac', 35],
+  ['mac-mini', 36],
+  ['mac-studio', 37],
+  ['mac-pro', 38],
+]);
+
+/** Kategori gösterim sırası: iPhone > iPad > Watch > Mac */
+const CATEGORY_ORDER = new Map([
+  ['iphone', 1],
+  ['ipad', 2],
+  ['watch', 3],
+  ['mac', 4],
+]);
 
 const state = {
   view: 'radar',
@@ -69,13 +107,16 @@ async function boot() {
   }
 
   state.ctx = buildContext(data, DEFAULTS);
-  // Birlikte çıkan aileler (iPhone 18 + Pro + Pro Max + Air) tek lansman sayılır.
-  const catOrder = new Map(state.categories.map((c) => [c.id, c.order]));
-  state.groups = coLaunchGroups(state.ctx).sort(
-    (a, b) =>
-      catOrder.get(a.members[0].category) - catOrder.get(b.members[0].category) ||
-      a.members[0].order - b.members[0].order
-  );
+
+  // Kullanıcının belirlediği özel sıralama ile ürün gruplarını sırala
+  state.groups = coLaunchGroups(state.ctx).sort((a, b) => {
+    const catA = CATEGORY_ORDER.get(a.members[0].category) ?? 99;
+    const catB = CATEGORY_ORDER.get(b.members[0].category) ?? 99;
+    if (catA !== catB) return catA - catB;
+    const famA = FAMILY_DISPLAY_ORDER.get(a.members[0].id) ?? 99;
+    const famB = FAMILY_DISPLAY_ORDER.get(b.members[0].id) ?? 99;
+    return famA - famB;
+  });
 
   document.getElementById('today').textContent = fmtLong(state.asOf);
   initTheme();
@@ -148,7 +189,7 @@ function buildFilters() {
   ));
 
   const search = el('input', {
-    class: 'search', type: 'search', placeholder: 'Ürün veya çip ara…',
+    class: 'search', type: 'search', placeholder: 'Ara…',
     'aria-label': 'Ürün veya çip ara',
   });
   let t;

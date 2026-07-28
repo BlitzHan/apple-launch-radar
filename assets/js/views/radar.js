@@ -165,7 +165,7 @@ function renderHero(events, index, state) {
     el('div', { class: 'hero__topbar' },
       el('div', { class: 'hero__badge' },
         el('span', { class: 'hero__badge-dot' }),
-        el('span', { class: 'hero__badge-text' }, future ? 'APPLE EVENT TAHMİNİ' : 'GERÇEKLEŞEN LANSMAN')
+        el('span', { class: 'hero__badge-text' }, future ? 'Tahmini Etkinlik' : 'Geçmiş Etkinlik')
       ),
       el('div', { class: 'hero__controls' },
         state.eventIndex !== null
@@ -183,7 +183,7 @@ function renderHero(events, index, state) {
     ),
     el('div', { class: 'hero__grid' },
       el('div', { class: 'hero__when' },
-        el('div', { class: 'stat__k' }, future ? 'Tahmini Tanıtım Tarihi' : 'Gerçekleşen Tanıtım Tarihi'),
+        el('div', { class: 'stat__k' }, future ? 'Tahmini tanıtım' : 'Tanıtım tarihi'),
         el('div', { class: 'hero__date' }, fmtLong(event.announce)),
         el('div', { class: 'hero__sale' },
           event.saleEnd
@@ -201,7 +201,7 @@ function renderHero(events, index, state) {
       ),
       el('div', { class: 'hero__products' },
         el('div', { class: 'stat__k' },
-          future ? `Tanıtılması Beklenen ${products.length} Model` : `Tanıtılan ${products.length} Model`),
+          future ? `Beklenen ${products.length} ürün` : `${products.length} ürün`),
         el('div', { class: 'hero__list' }, rows),
         el('p', { class: 'hero__note' }, note)
       )
