@@ -7,12 +7,53 @@
   margin-bottom: 26px;
 }
 
-/* Altı hat tek sırada yan yana; dar ekranlarda kırılır. */
-.lineups__grid {
-  display: grid;
-  grid-template-columns: repeat(6, minmax(0, 1fr));
-  gap: 10px;
+.lineups__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
 }
+
+.lineups__arrows {
+  display: flex;
+  gap: 6px;
+  flex: none;
+}
+
+.lineups__arrow {
+  appearance: none;
+  width: 30px;
+  height: 30px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border);
+  background: var(--surface);
+  color: var(--text-dim);
+  font-size: 17px;
+  line-height: 1;
+  cursor: pointer;
+  transition: color 0.2s var(--ease), border-color 0.2s var(--ease);
+}
+.lineups__arrow:hover { color: var(--text); border-color: var(--text-faint); }
+
+/* Yatay kaydırılan hat şeridi: ekranda ~5,5 kutu görünür, gerisi kaydırılır. */
+.lineups__scroller {
+  position: relative;
+  /* Sağdaki kutular şeridin sonuna doğru sönümlenir — kaydırılabildiği belli olsun. */
+  -webkit-mask-image: linear-gradient(90deg, #000 0, #000 94%, transparent 100%);
+  mask-image: linear-gradient(90deg, #000 0, #000 94%, transparent 100%);
+}
+
+.lineups__track {
+  --gap: 10px;
+  display: flex;
+  gap: var(--gap);
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  scroll-snap-type: x proximity;
+  scrollbar-width: none;
+  padding: 2px 2px 4px;
+}
+.lineups__track::-webkit-scrollbar { display: none; }
 
 .lineup {
   appearance: none;
@@ -22,6 +63,8 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  flex: 0 0 calc((100% - 4.5 * var(--gap)) / 5.5);
+  scroll-snap-align: start;
   padding: 14px;
   background: var(--surface);
   border: 1px solid var(--border);
@@ -129,12 +172,12 @@
 }
 
 @media (max-width: 1180px) {
-  .lineups__grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .lineup { flex-basis: calc((100% - 2.5 * var(--gap)) / 3.5); }
 }
 
-@media (max-width: 640px) {
-  .lineups__grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-  .lineup__model, .lineup__meta { min-height: 0; }
+@media (max-width: 760px) {
+  .lineup { flex-basis: calc((100% - 1.4 * var(--gap)) / 2.4); }
+  .lineups__arrows { display: none; }
 }
 
 /* ---------------------------------------------------------- Hero: Keynote Lansman */

@@ -55,7 +55,9 @@ export function expectedName(family, devices, pred) {
   if (family.category === 'iphone' || family.category === 'watch') return bumpName(last.name);
 
   const gen = pred?.chip?.genKey;
-  if (!gen) return family.label;
+  // Çip tahmini yoksa (tek nesilli ürün, ya da A-serisi gibi modellenmemiş hat)
+  // aile adını olduğu gibi yazmak yanıltıcı: "iPad (standart)" sıradaki modelin adı değil.
+  if (!gen) return `Yeni nesil ${family.label.replace(/\s*\((?:standart|baz[^)]*)\)/i, '').trim()}`;
 
   // Aile adındaki sondaki parantez ya kademe bilgisidir (Pro/Max — korunur) ya da
   // eskimiş çip bilgisidir (baz M — atılır), sonuna yeni çip nesli yazılır.

@@ -163,11 +163,20 @@ Bu düzeltme Mac mini hatasını −203 günden +46 güne çekti.
 (`iPhone 18`, `Apple Watch Series 12`); Mac ve iPad **çip nesliyle** (`MacBook Air (M6)`).
 Mac/iPad adlarındaki sayı ekran boyutudur — `modelToken()`'ı oralarda kullanma, `14"` çıkar.
 
-**Ürün hattı kutuları** (`radar.js/LINEUPS`): radar ekranının üstündeki 6 kutu — iPhone ·
-iPad Pro · iPad Air · Apple Watch · MacBook Pro · MacBook Air. Kategoriye göre değil **hatta**
-göre bölünür, çünkü mağazada müşteri "iPad" değil "iPad Pro" sorar. Her hattın `lead` ailesi
-kutunun adını ve tarihlerini verir; `with` listesindeki kardeş aileler yalnızca `+2` rozeti
-olarak görünür. Kutuya tıklamak hero panelini o hattın ilk gelecek lansman olayına götürür.
+**Ürün hattı kutuları** (`radar.js/LINEUPS`): radar ekranının üstündeki yatay kaydırmalı
+şerit, 13 hat. Kategoriye göre değil **hatta** göre bölünür, çünkü mağazada müşteri "iPad"
+değil "iPad Pro" sorar. Her hattın `lead` ailesi kutunun adını ve tarihlerini verir; `with`
+listesindeki kardeş aileler yalnızca `+2` rozeti olarak görünür. Kutuya tıklamak hero panelini
+o hattın ilk gelecek lansman olayına götürür.
+
+- **Sıra tahmini çıkış tarihine göredir** (en yakın en başta), sabit bir liste değil. Gecikmiş
+  ürünler tarihi geçtiği için doğal olarak en öne gelir — mağaza için doğrusu da bu.
+- Ekranda ~5,5 kutu görünür (`flex-basis: calc((100% - 4.5*gap) / 5.5)`); yarım kalan kutu
+  ve sağdaki sönümleme maskesi "devamı var" işaretidir, süs değil. Bunu tam sayıya çevirme.
+- `compactModel()` kutuda ekran boyutunu ve ikinci çip varyantını ayıklar
+  (`Mac mini (M4 / M4 Pro)` → `Mac mini (M4)`); tam ad hero'da ve çekmecede duruyor.
+- **Listede olmayan tek aktif aile: Mac Pro** — tek Apple Silicon nesli var, kadans
+  hesaplanamıyor. Eklenmesi istenirse önce ikinci nesli `devices.json`'a girmeli.
 
 **Gecikmiş ürünler gizlenmez.** Tahmin penceresi geçmişse `overdue: true` ile işaretlenir.
 "Bu ürün yenilenmeyi geçti" bilgisi mağaza için tahmin kadar değerli.

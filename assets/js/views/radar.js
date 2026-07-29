@@ -214,6 +214,13 @@ const LINEUPS = [
   { id: 'watch', label: 'Apple Watch', icon: 'watch', lead: 'watch-series', with: ['watch-ultra', 'watch-se'] },
   { id: 'macbook-pro', label: 'MacBook Pro', icon: 'mac', lead: 'macbook-pro-base', with: ['macbook-pro-promax'] },
   { id: 'macbook-air', label: 'MacBook Air', icon: 'mac', lead: 'macbook-air', with: [] },
+  { id: 'iphone-e', label: 'iPhone e', icon: 'iphone', lead: 'iphone-e', with: [] },
+  { id: 'ipad', label: 'iPad', icon: 'ipad', lead: 'ipad-base', with: [] },
+  { id: 'ipad-mini', label: 'iPad mini', icon: 'ipad', lead: 'ipad-mini', with: [] },
+  { id: 'macbook-neo', label: 'MacBook Neo', icon: 'mac', lead: 'macbook-neo', with: [] },
+  { id: 'mac-mini', label: 'Mac mini', icon: 'macmini', lead: 'mac-mini', with: [] },
+  { id: 'imac', label: 'iMac', icon: 'imac', lead: 'imac', with: [] },
+  { id: 'mac-studio', label: 'Mac Studio', icon: 'macmini', lead: 'mac-studio', with: [] },
 ];
 
 /* Apple ürün siluetleri — currentColor ile kategori rengini alır. */
@@ -222,6 +229,8 @@ const ICONS = {
   ipad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4.5" y="2.5" width="15" height="19" rx="2.2"/><path d="M10.8 19.2h2.4" stroke-linecap="round"/></svg>',
   watch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="7" y="6.5" width="10" height="11" rx="3"/><path d="M9.3 6.5 9.8 3h4.4l.5 3.5M9.3 17.5l.5 3.5h4.4l.5-3.5" stroke-linejoin="round"/><path d="M17 10.5v3" stroke-linecap="round"/></svg>',
   mac: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4.5" width="16" height="11" rx="1.6"/><path d="M2 18.5h20" stroke-linecap="round"/></svg>',
+  imac: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3.5" width="18" height="13" rx="1.8"/><path d="M9.6 16.5v3.5h4.8v-3.5M8 20h8" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+  macmini: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="8" width="18" height="8" rx="2"/><circle cx="7" cy="12" r="0.9" fill="currentColor" stroke="none"/></svg>',
 };
 
 /**
@@ -231,7 +240,7 @@ const ICONS = {
  */
 function compactModel(name) {
   return name
-    .replace(/\(([^)]*)\)/, (_, inner) => `(${inner.split(',')[0].trim()})`)
+    .replace(/\(([^)]*)\)/, (_, inner) => `(${inner.split(/[,/]/)[0].trim()})`)
     .replace(/\s*\d+(?:[/,]\d+)*\s*["″]/g, '')
     .replace(/\s{2,}/g, ' ')
     .trim();
@@ -243,14 +252,21 @@ function compactModel(name) {
  * Kutuya tıklamak hero panelini o hattın lansman olayına götürür.
  */
 function renderLineupTiles(state, events, index) {
-  const tiles = [];
-
+  // Sıra tarihe göre: en yakın çıkacak ürün en başta. Penceresi kapanmış
+  // (gecikmiş) ürünler tarihi geçmiş olduğu için doğal olarak en öne gelir —
+  // mağaza için doğrusu da bu, "her an çıkabilir" demek.
+  const rows = [];
   for (const line of LINEUPS) {
     const fam = state.ctx.familyById.get(line.lead);
     if (!fam || !fam.active || !state.matches(fam)) continue;
-
     const pred = predictFamily(fam.id, state.ctx, { asOf: state.asOf });
-    if (!pred) continue;
+    if (pred) rows.push({ line, fam, pred });
+  }
+  rows.sort((a, b) => a.pred.date - b.pred.date);
+
+  const tiles = [];
+
+  for (const { line, fam, pred } of rows) {
 
     const devices = state.ctx.byFamily.get(fam.id) || [];
     const last = pred.lastRelease;
@@ -299,12 +315,26 @@ function renderLineupTiles(state, events, index) {
 
   if (!tiles.length) return null;
 
+  const track = el('div', { class: 'lineups__track' }, tiles);
+
+  // Bir "sayfa" = görünen genişliğin %85'i; son kutu yarım kalmasın diye tam değil.
+  const smooth = !window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const page = (dir) => () => track.scrollBy({
+    left: dir * track.clientWidth * 0.85,
+    behavior: smooth ? 'smooth' : 'auto',
+  });
+  const arrow = (dir, text, label) =>
+    el('button', { class: 'lineups__arrow', 'aria-label': label, onClick: page(dir) }, text);
+
   return el('div', { class: 'lineups' },
-    el('div', { class: 'section-head' },
-      el('h2', {}, 'Ürün Hatları'),
-      el('p', {}, 'Her hattın son çıkan modeli ve sıradaki beklenen lansmanı. Ayrıntı için bir hatta dokunun.')
+    el('div', { class: 'lineups__head' },
+      el('div', { class: 'section-head' },
+        el('h2', {}, 'Ürün Hatları'),
+        el('p', {}, 'En yakın çıkması beklenen hat en başta. Ayrıntı için bir hatta dokunun.')
+      ),
+      el('div', { class: 'lineups__arrows' }, arrow(-1, '‹', 'Geri kaydır'), arrow(1, '›', 'İleri kaydır'))
     ),
-    el('div', { class: 'lineups__grid' }, tiles)
+    el('div', { class: 'lineups__scroller' }, track)
   );
 }
 
