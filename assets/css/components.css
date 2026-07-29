@@ -2,186 +2,134 @@
    Apple Launch Radar — Components
    ============================================================ */
 
-/* ---------------------------------------------------------- Category Explorer Module */
-.cat-explorer {
-  margin-top: 36px;
-  margin-bottom: 48px;
+/* ---------------------------------------------------------- Ürün Hattı Kutuları */
+.lineups {
+  margin-bottom: 28px;
 }
 
-.cat-explorer__tabs {
-  display: flex;
-  gap: 10px;
-  flex-wrap: wrap;
-  margin-bottom: 20px;
-}
-
-.cat-explorer__tab {
-  appearance: none;
-  border: 1px solid var(--border);
-  background: var(--surface);
-  cursor: pointer;
-  font-family: var(--sans);
-  font-size: 13px;
-  font-weight: 500;
-  color: var(--text-dim);
-  padding: 8px 18px;
-  border-radius: var(--radius-pill);
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  transition: all 0.2s var(--ease);
-}
-.cat-explorer__tab:hover {
-  color: var(--text);
-  border-color: var(--text-faint);
-}
-.cat-explorer__tab.is-active {
-  background: color-mix(in oklab, var(--accent, var(--iphone)) 12%, var(--surface-2));
-  color: var(--text);
-  border-color: var(--accent, var(--iphone));
-  font-weight: 600;
-}
-
-.cat-explorer__dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-}
-
-.cat-explorer__grid {
+.lineups__grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 14px;
 }
 
-.cat-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 24px;
+.lineup {
+  appearance: none;
+  text-align: left;
+  font-family: var(--sans);
   cursor: pointer;
-  transition: all 0.25s var(--ease);
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
-}
-.cat-card:hover {
-  border-color: color-mix(in oklab, var(--accent, var(--iphone)) 40%, var(--border));
-  transform: translateY(-2px);
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.25);
-}
-
-.cat-card__header {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 12px;
-  margin-bottom: 16px;
-}
-
-.cat-card__title-group {
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.cat-card__badge-cat {
-  font-size: 11px;
-  font-weight: 600;
-  text-transform: uppercase;
-  letter-spacing: 0.06em;
-  color: var(--accent, var(--iphone));
-}
-
-.cat-card__name {
-  font-size: 20px;
-  font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--text);
-}
-
-.cat-card__metrics {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  background: color-mix(in oklab, var(--surface-2) 40%, transparent);
-  border-radius: var(--radius-sm);
-  padding: 16px 18px;
-  border: 1px solid var(--border-soft);
-  margin-bottom: 16px;
+  padding: 20px;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow-subtle);
+  transition: transform 0.25s var(--ease), border-color 0.25s var(--ease), box-shadow 0.25s var(--ease);
+}
+.lineup:hover:not(:disabled) {
+  transform: translateY(-2px);
+  border-color: color-mix(in oklab, var(--accent, var(--iphone)) 45%, var(--border));
+  box-shadow: var(--shadow);
+}
+.lineup:focus-visible {
+  outline: 2px solid var(--accent, var(--iphone));
+  outline-offset: 2px;
+}
+.lineup.is-selected {
+  border-color: var(--accent, var(--iphone));
+  background: color-mix(in oklab, var(--accent, var(--iphone)) 5%, var(--surface));
+}
+.lineup:disabled {
+  cursor: default;
+  opacity: 0.55;
 }
 
-.cat-card__metric {
+.lineup__head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.lineup__icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 34px;
+  height: 34px;
+  flex: none;
+  border-radius: 11px;
+  color: var(--accent, var(--iphone));
+  background: color-mix(in oklab, var(--accent, var(--iphone)) 12%, transparent);
+}
+.lineup__icon svg { width: 20px; height: 20px; display: block; }
+
+.lineup__name {
+  font-size: 16px;
+  font-weight: 600;
+  letter-spacing: -0.02em;
+  color: var(--text);
+}
+
+.lineup__count {
+  margin-left: auto;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--accent, var(--iphone));
+  background: color-mix(in oklab, var(--accent, var(--iphone)) 12%, transparent);
+  padding: 2px 8px;
+  border-radius: var(--radius-pill);
+}
+
+.lineup__block {
   display: flex;
   flex-direction: column;
   gap: 2px;
 }
-
-.cat-card__metric--next {
+.lineup__block--next {
+  padding-top: 13px;
   border-top: 1px solid var(--border-soft);
-  padding-top: 12px;
 }
 
-.cat-card__label {
+.lineup__label {
   font-size: 11px;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: 0.02em;
   text-transform: uppercase;
-  letter-spacing: 0.05em;
   color: var(--text-faint);
 }
 
-.cat-card__val {
-  font-size: 15px;
+.lineup__model {
+  font-size: 19px;
   font-weight: 600;
+  letter-spacing: -0.022em;
   color: var(--text);
+  line-height: 1.24;
+  /* İki satırlık pay: kutular arasında "son çıkan" ve "sıradaki" blokları hizalı kalsın. */
+  min-height: 2.48em;
 }
+.lineup__model--next { color: var(--accent, var(--iphone)); }
 
-.cat-card__val--highlight {
-  font-size: 17px;
-  font-weight: 700;
-  color: var(--text);
-}
-
-.cat-card__sub {
-  font-size: 12px;
+.lineup__meta {
+  font-size: 12.5px;
   color: var(--text-dim);
   font-variant-numeric: tabular-nums;
 }
+.lineup__meta--next { color: var(--text-dim); }
 
-.cat-card__sub--highlight {
-  font-size: 12.5px;
-  font-weight: 600;
-  color: var(--accent, var(--iphone));
+@media (max-width: 980px) {
+  .lineups__grid { grid-template-columns: 1fr 1fr; }
 }
 
-.cat-card__footer {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  font-size: 12px;
-  color: var(--text-faint);
-  padding-top: 10px;
-  border-top: 1px solid var(--border-soft);
-}
-
-.cat-card__range {
-  font-variant-numeric: tabular-nums;
-}
-
-.cat-card__link {
-  appearance: none;
-  border: 0;
-  background: transparent;
-  cursor: pointer;
-  font-family: var(--sans);
-  font-size: 12px;
-  color: var(--iphone);
-  padding: 0;
-  white-space: nowrap;
-}
-.cat-card__link:hover {
-  text-decoration: underline;
+@media (max-width: 520px) {
+  .lineups__grid { grid-template-columns: 1fr 1fr; gap: 10px; }
+  .lineup { padding: 15px; gap: 11px; }
+  .lineup__name { font-size: 14px; }
+  .lineup__model { font-size: 16px; min-height: 0; }
+  .lineup__name { line-height: 1.15; }
+  .lineup__icon { width: 28px; height: 28px; border-radius: 9px; }
+  .lineup__icon svg { width: 17px; height: 17px; }
 }
 
 /* ---------------------------------------------------------- Hero: Keynote Lansman */
@@ -229,52 +177,6 @@
 @keyframes hero-pulse {
   0%, 100% { opacity: 0.5; transform: scale(0.9); }
   50% { opacity: 1; transform: scale(1.15); }
-}
-
-/* Hero Category Selector Bar */
-.hero__cat-selector {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  overflow-x: auto;
-  scrollbar-width: none;
-}
-.hero__cat-selector::-webkit-scrollbar { display: none; }
-
-.hero__cat-label {
-  font-size: 11px;
-  color: var(--text-faint);
-  white-space: nowrap;
-  margin-right: 4px;
-}
-
-.hero__cat-btn {
-  appearance: none;
-  border: 1px solid var(--border-soft);
-  background: transparent;
-  cursor: pointer;
-  font-family: var(--sans);
-  font-size: 11.5px;
-  font-weight: 500;
-  color: var(--text-dim);
-  padding: 3px 9px;
-  border-radius: var(--radius-pill);
-  white-space: nowrap;
-  transition: all 0.2s var(--ease);
-}
-.hero__cat-btn:hover:not(:disabled) {
-  color: var(--text);
-  border-color: var(--text-faint);
-}
-.hero__cat-btn.is-selected {
-  background: var(--surface-2);
-  color: var(--text);
-  border-color: var(--iphone);
-  font-weight: 600;
-}
-.hero__cat-btn:disabled {
-  opacity: 0.3;
-  cursor: default;
 }
 
 .hero__controls {
@@ -469,7 +371,6 @@
   .hero__when { padding: 28px 24px; }
   .hero__date { font-size: 32px; }
   .hero__topbar { padding: 0 16px; flex-wrap: wrap; height: auto; padding-top: 10px; padding-bottom: 10px; }
-  .hero__cat-selector { order: 3; width: 100%; margin-top: 4px; }
 }
 
 /* ---------------------------------------------------------- Accordion Past History (Apple Keynote Style) */

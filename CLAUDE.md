@@ -38,7 +38,7 @@ assets/js/
   main.js         (172)     state, sekme yönlendirme, filtreler, FAMILY_DISPLAY_ORDER
   ui.js           (146)     el() DOM yardımcısı, TR tarih formatları, isimlendirme kuralları
   views/
-    radar.js      (~430)    ana ekran: hero paneli + kategori gezgini + akordeon geçmiş
+    radar.js      (~440)    ana ekran: ürün hattı kutuları + hero paneli + akordeon geçmiş
     timeline.js   (239)     yatay Gantt; şerit = lansman hattı
     diffusion.js  (109)     çip yayılım matrisi (ürün × M nesli)
     drawer.js     (212)     sağdan açılan detay paneli
@@ -162,6 +162,12 @@ Bu düzeltme Mac mini hatasını −203 günden +46 güne çekti.
 **İsimlendirme** (`ui.js/expectedName`): iPhone ve Watch **model numarasıyla** anılır
 (`iPhone 18`, `Apple Watch Series 12`); Mac ve iPad **çip nesliyle** (`MacBook Air (M6)`).
 Mac/iPad adlarındaki sayı ekran boyutudur — `modelToken()`'ı oralarda kullanma, `14"` çıkar.
+
+**Ürün hattı kutuları** (`radar.js/LINEUPS`): radar ekranının üstündeki 6 kutu — iPhone ·
+iPad Pro · iPad Air · Apple Watch · MacBook Pro · MacBook Air. Kategoriye göre değil **hatta**
+göre bölünür, çünkü mağazada müşteri "iPad" değil "iPad Pro" sorar. Her hattın `lead` ailesi
+kutunun adını ve tarihlerini verir; `with` listesindeki kardeş aileler yalnızca `+2` rozeti
+olarak görünür. Kutuya tıklamak hero panelini o hattın ilk gelecek lansman olayına götürür.
 
 **Gecikmiş ürünler gizlenmez.** Tahmin penceresi geçmişse `overdue: true` ile işaretlenir.
 "Bu ürün yenilenmeyi geçti" bilgisi mağaza için tahmin kadar değerli.

@@ -128,39 +128,6 @@ function renderHero(events, index, state) {
     onClick: () => { state.eventIndex = index + delta; state.render(); },
   }, text);
 
-  // Kategori Butonları Seçicisi (Hero üstünde)
-  const categorySelector = el('div', { class: 'hero__cat-selector' },
-    el('span', { class: 'hero__cat-label' }, 'Gelecek Lansmanı Seç:'),
-    [
-      { id: 'all', label: 'Tüm Ürünler' },
-      { id: 'iphone', label: 'iPhone' },
-      { id: 'ipad', label: 'iPad' },
-      { id: 'watch', label: 'Watch' },
-      { id: 'mac', label: 'Mac' },
-    ].map((cat) => {
-      let targetIndex = null;
-      if (cat.id === 'all') {
-        targetIndex = events.findIndex((e) => e.kind === 'future');
-      } else {
-        targetIndex = events.findIndex(
-          (e) => e.kind === 'future' && e.products.some((p) => p.category === cat.id)
-        );
-      }
-      const isSelected = targetIndex === index;
-
-      return el('button', {
-        class: `hero__cat-btn${isSelected ? ' is-selected' : ''}`,
-        disabled: targetIndex === -1,
-        onClick: () => {
-          if (targetIndex !== -1) {
-            state.eventIndex = targetIndex;
-            state.render();
-          }
-        },
-      }, cat.label);
-    })
-  );
-
   const rows = products.map((prod) =>
     el('div', { class: 'hero__prod', style: accentStyle(state.categories, prod.category) },
       el('span', { class: 'hero__prod-dot' }),
@@ -188,7 +155,6 @@ function renderHero(events, index, state) {
         el('span', { class: 'hero__badge-dot' }),
         el('span', { class: 'hero__badge-text' }, future ? 'Tahmini Etkinlik' : 'Geçmiş Etkinlik')
       ),
-      categorySelector,
       el('div', { class: 'hero__controls' },
         state.eventIndex !== null
           ? el('button', {
@@ -231,93 +197,101 @@ function renderHero(events, index, state) {
   );
 }
 
+/* --------------------------------------------------- ürün hattı kutuları */
+
 /**
- * Kategori Bazlı Ürün Tahmin Modülü.
- * İlk çıkacak cihaz ilk sırada yer alacak şekilde sıralanır (tarih önceliği).
- * Sadece en net 3 bilgiyi içerir: Son Çıkış, Geçen Gün ve Sıradaki Tahmini Çıkış.
+ * Ürün hatları. Apple mağazada ürünü kategoriyle değil hatla anar: müşteri
+ * "iPad" değil "iPad Pro" ya da "MacBook Air" sorar. Bu yüzden iPad ve MacBook
+ * Pro/Air olarak ikiye ayrıldı.
+ *
+ * `lead` = kutunun ismini ve tarihlerini veren aile (hattın amiral gemisi).
+ * `with` = aynı etkinlikte çıkan kardeş aileler; yalnızca sayı olarak görünür.
  */
-function renderCategoryExplorer(state) {
-  const currentCat = state.activeCategoryTab || 'iphone';
+const LINEUPS = [
+  { id: 'iphone', label: 'iPhone', icon: 'iphone', lead: 'iphone-base', with: ['iphone-pro', 'iphone-promax', 'iphone-air'] },
+  { id: 'ipad-pro', label: 'iPad Pro', icon: 'ipad', lead: 'ipad-pro', with: [] },
+  { id: 'ipad-air', label: 'iPad Air', icon: 'ipad', lead: 'ipad-air', with: [] },
+  { id: 'watch', label: 'Apple Watch', icon: 'watch', lead: 'watch-series', with: ['watch-ultra', 'watch-se'] },
+  { id: 'macbook-pro', label: 'MacBook Pro', icon: 'mac', lead: 'macbook-pro-base', with: ['macbook-pro-promax'] },
+  { id: 'macbook-air', label: 'MacBook Air', icon: 'mac', lead: 'macbook-air', with: [] },
+];
 
-  const catTabs = el('div', { class: 'cat-explorer__tabs' },
-    state.categories.map((c) => el('button', {
-      class: `cat-explorer__tab${c.id === currentCat ? ' is-active' : ''}`,
-      style: c.id === currentCat ? `--accent:${c.color}` : '',
-      onClick: () => {
-        state.activeCategoryTab = c.id;
-        state.render();
-      },
-    },
-      el('span', { class: 'cat-explorer__dot', style: { background: c.color } }),
-      c.label
-    ))
-  );
+/* Apple ürün siluetleri — currentColor ile kategori rengini alır. */
+const ICONS = {
+  iphone: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="7" y="2.5" width="10" height="19" rx="2.6"/><path d="M10.6 4.9h2.8" stroke-linecap="round"/></svg>',
+  ipad: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4.5" y="2.5" width="15" height="19" rx="2.2"/><path d="M10.8 19.2h2.4" stroke-linecap="round"/></svg>',
+  watch: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="7" y="6.5" width="10" height="11" rx="3"/><path d="M9.3 6.5 9.8 3h4.4l.5 3.5M9.3 17.5l.5 3.5h4.4l.5-3.5" stroke-linejoin="round"/><path d="M17 10.5v3" stroke-linecap="round"/></svg>',
+  mac: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4" y="4.5" width="16" height="11" rx="1.6"/><path d="M2 18.5h20" stroke-linecap="round"/></svg>',
+};
 
-  const families = state.ctx.families.filter(
-    (f) => f.active && f.category === currentCat && state.matches(f)
-  );
+/**
+ * "Tahmini Etkinlik" panelinin üstündeki hat kutuları: her hattın en son çıkan
+ * modeli, kaç gün önce çıktığı ve sıradaki beklenen model + tarihi.
+ * Kutuya tıklamak hero panelini o hattın lansman olayına götürür.
+ */
+function renderLineupTiles(state, events, index) {
+  const tiles = [];
 
-  // Ürünleri tahmini çıkış tarihine göre sırala (Önce çıkması beklenen ilk sırada!)
-  const items = families.map((f) => {
-    const pred = predictFamily(f.id, state.ctx, { asOf: state.asOf });
-    if (!pred) return null;
-    const devices = state.ctx.byFamily.get(f.id) || [];
-    const nextName = expectedName(f, devices, pred);
+  for (const line of LINEUPS) {
+    const fam = state.ctx.familyById.get(line.lead);
+    if (!fam || !fam.active || !state.matches(fam)) continue;
+
+    const pred = predictFamily(fam.id, state.ctx, { asOf: state.asOf });
+    if (!pred) continue;
+
+    const devices = state.ctx.byFamily.get(fam.id) || [];
     const last = pred.lastRelease;
-    return { family: f, pred, last, nextName };
-  }).filter(Boolean);
+    const nextName = expectedName(fam, devices, pred);
+    const siblings = line.with.filter((id) => {
+      const f = state.ctx.familyById.get(id);
+      return f && f.active && state.matches(f);
+    }).length;
 
-  // Sıralama: Gecikmiş ürünler en üstte, sonra çıkış tarihi en yakın olanlar.
-  items.sort((a, b) => a.pred.date - b.pred.date);
+    // Kutunun hedefi: bu ailenin göründüğü ilk gelecek lansman olayı.
+    const target = events.findIndex(
+      (e) => e.kind === 'future' && e.products.some((p) => p.familyId === fam.id)
+    );
+    const selected = target !== -1 && target === index;
 
-  const grid = el('div', { class: 'cat-explorer__grid' });
-
-  for (const item of items) {
-    const { family: f, pred, last, nextName } = item;
-
-    const card = el('div', {
-      class: 'cat-card',
-      style: accentStyle(state.categories, f.category),
+    tiles.push(el('button', {
+      class: `lineup${selected ? ' is-selected' : ''}`,
+      style: accentStyle(state.categories, fam.category),
+      disabled: target === -1,
+      'aria-pressed': String(selected),
+      onClick: () => { state.eventIndex = target; state.render(); },
     },
-      el('div', { class: 'cat-card__header' },
-        el('div', { class: 'cat-card__title-group' },
-          el('span', { class: 'cat-card__badge-cat' }, state.categories.find((c) => c.id === f.category)?.label),
-          el('h3', { class: 'cat-card__name' }, f.label)
-        ),
-        confidenceBadge(pred)
+      el('div', { class: 'lineup__head' },
+        el('span', { class: 'lineup__icon', html: ICONS[line.icon] }),
+        el('span', { class: 'lineup__name' }, line.label),
+        siblings ? el('span', { class: 'lineup__count' }, `+${siblings}`) : null
       ),
 
-      el('div', { class: 'cat-card__metrics' },
-        // 1. En Son Çıkan Model
-        el('div', { class: 'cat-card__metric' },
-          el('span', { class: 'cat-card__label' }, 'En Son Çıkan Model'),
-          el('div', { class: 'cat-card__val' }, last.name),
-          el('span', { class: 'cat-card__sub' }, `${fmtLong(toDate(last.released))} · (${pred.daysSinceLast} gün önce çıktı)`)
-        ),
+      el('div', { class: 'lineup__block' },
+        el('span', { class: 'lineup__label' }, 'Son çıkan'),
+        el('span', { class: 'lineup__model' }, last.name),
+        el('span', { class: 'lineup__meta' },
+          `${fmtShort(last.released)} · ${pred.daysSinceLast} gün önce`)
+      ),
 
-        // 2. Bir Sonraki Çıkış Tahmini
-        el('div', { class: 'cat-card__metric cat-card__metric--next' },
-          el('span', { class: 'cat-card__label' }, 'Sıradaki Model & Tahmini Çıkış'),
-          el('div', { class: 'cat-card__val cat-card__val--highlight' }, nextName),
-          el('span', { class: 'cat-card__sub cat-card__sub--highlight' },
-            pred.overdue
-              ? `⚠️ Pencere Kapandı (${fmtAway(pred.daysAway)})`
-              : `🚀 Tahmini Lansman: ${fmtLong(pred.date)} (${fmtAway(pred.daysAway)})`
-          )
-        )
+      el('div', { class: 'lineup__block lineup__block--next' },
+        el('span', { class: 'lineup__label' }, 'Sıradaki beklenen'),
+        el('span', { class: 'lineup__model lineup__model--next' }, nextName),
+        el('span', { class: 'lineup__meta lineup__meta--next' },
+          pred.overdue
+            ? `Pencere kapandı · ${fmtAway(pred.daysAway)}`
+            : `${fmtShort(pred.date)} · ${fmtAway(pred.daysAway)}`)
       )
-    );
-
-    grid.append(card);
+    ));
   }
 
-  return el('div', { class: 'cat-explorer' },
+  if (!tiles.length) return null;
+
+  return el('div', { class: 'lineups' },
     el('div', { class: 'section-head' },
-      el('h2', {}, 'Ürün Çıkış Tahminleri'),
-      el('p', {}, 'İlk çıkması beklenen ürünler üst sırada listelenir. Son çıkış ve tahmini gelecek lansman tarihleri.')
+      el('h2', {}, 'Ürün Hatları'),
+      el('p', {}, 'Her hattın son çıkan modeli ve sıradaki beklenen lansmanı. Ayrıntı için bir hatta dokunun.')
     ),
-    catTabs,
-    grid
+    el('div', { class: 'lineups__grid' }, tiles)
   );
 }
 
@@ -413,11 +387,12 @@ export function renderRadar(root, state) {
     ? firstFuture
     : Math.min(Math.max(state.eventIndex, 0), events.length - 1);
 
-  // 1. Hero alanı (Tahmini Etkinlik & Kategori Seçicili)
-  if (events.length) root.append(renderHero(events, index, state));
+  // 1. Ürün hattı kutuları — hero'nun üstünde, hattı seçmenin de yolu
+  const tiles = renderLineupTiles(state, events, index);
+  if (tiles) root.append(tiles);
 
-  // 2. Kategori Bazlı Ürün Döngüleri & Tahmin Modülü (iPhone / iPad / Mac / Watch)
-  root.append(renderCategoryExplorer(state));
+  // 2. Hero alanı (Tahmini / Geçmiş Etkinlik)
+  if (events.length) root.append(renderHero(events, index, state));
 
   // 3. Apple Store standartlarında Lüks Gerçekleşen Lansman Geçmişi
   const pastEvents = events.filter((e) => e.kind === 'past');
