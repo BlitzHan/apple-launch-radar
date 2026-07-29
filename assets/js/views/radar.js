@@ -225,6 +225,19 @@ const ICONS = {
 };
 
 /**
+ * Kutular dar olduğu için model adından ekran boyutu ayıklanır:
+ * `iPad Pro (M5, 11" & 13")` → `iPad Pro (M5)` · `MacBook Air 13/15" (M5)` → `MacBook Air (M5)`.
+ * Boyut bilgisi kutunun taşıdığı bilgi değil; tam ad hero panelinde ve detayda duruyor.
+ */
+function compactModel(name) {
+  return name
+    .replace(/\(([^)]*)\)/, (_, inner) => `(${inner.split(',')[0].trim()})`)
+    .replace(/\s*\d+(?:[/,]\d+)*\s*["″]/g, '')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
+}
+
+/**
  * "Tahmini Etkinlik" panelinin üstündeki hat kutuları: her hattın en son çıkan
  * modeli, kaç gün önce çıktığı ve sıradaki beklenen model + tarihi.
  * Kutuya tıklamak hero panelini o hattın lansman olayına götürür.
@@ -268,14 +281,14 @@ function renderLineupTiles(state, events, index) {
 
       el('div', { class: 'lineup__block' },
         el('span', { class: 'lineup__label' }, 'Son çıkan'),
-        el('span', { class: 'lineup__model' }, last.name),
+        el('span', { class: 'lineup__model' }, compactModel(last.name)),
         el('span', { class: 'lineup__meta' },
           `${fmtShort(last.released)} · ${pred.daysSinceLast} gün önce`)
       ),
 
       el('div', { class: 'lineup__block lineup__block--next' },
         el('span', { class: 'lineup__label' }, 'Sıradaki beklenen'),
-        el('span', { class: 'lineup__model lineup__model--next' }, nextName),
+        el('span', { class: 'lineup__model lineup__model--next' }, compactModel(nextName)),
         el('span', { class: 'lineup__meta lineup__meta--next' },
           pred.overdue
             ? `Pencere kapandı · ${fmtAway(pred.daysAway)}`
