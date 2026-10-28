@@ -23,6 +23,9 @@
     { "id": "M5",       "series": "M", "gen": 5, "tier": "base",  "label": "M5",       "node": "3 nm (N3P)",  "debut": "2025-10-22", "debutFamily": "macbook-pro-base" },
     { "id": "M5 Pro",   "series": "M", "gen": 5, "tier": "pro",   "label": "M5 Pro",   "node": "3 nm (N3P)",  "debut": "2026-03-11", "debutFamily": "macbook-pro-promax" },
     { "id": "M5 Max",   "series": "M", "gen": 5, "tier": "max",   "label": "M5 Max",   "node": "3 nm (N3P)",  "debut": "2026-03-11", "debutFamily": "macbook-pro-promax" },
+    { "id": "M5 Ultra", "series": "M", "gen": 5, "tier": "ultra", "label": "M5 Ultra", "node": "3 nm (N3P)",  "debut": "2026-09-22", "debutFamily": "mac-studio" },
+
+    { "id": "M6",       "series": "M", "gen": 6, "tier": "base",  "label": "M6",       "node": "2 nm (N2)",   "debut": "2026-09-22", "debutFamily": "mac-mini" },
 
     { "id": "A12 Bionic",  "series": "A", "gen": 12, "tier": "base", "label": "A12",     "node": "7 nm (N7)",  "debut": "2018-09-21", "debutFamily": "iphone-base" },
     { "id": "A13 Bionic",  "series": "A", "gen": 13, "tier": "base", "label": "A13",     "node": "7 nm (N7P)", "debut": "2019-09-20", "debutFamily": "iphone-base" },
@@ -34,6 +37,7 @@
     { "id": "A18 Pro",     "series": "A", "gen": 18, "tier": "pro",  "label": "A18 Pro", "node": "3 nm (N3E)", "debut": "2024-09-20", "debutFamily": "iphone-pro" },
     { "id": "A19",         "series": "A", "gen": 19, "tier": "base", "label": "A19",     "node": "3 nm (N3P)", "debut": "2025-09-19", "debutFamily": "iphone-base" },
     { "id": "A19 Pro",     "series": "A", "gen": 19, "tier": "pro",  "label": "A19 Pro", "node": "3 nm (N3P)", "debut": "2025-09-19", "debutFamily": "iphone-pro" },
+    { "id": "A20 Pro",     "series": "A", "gen": 20, "tier": "pro",  "label": "A20 Pro", "node": "2 nm (N2)",  "debut": "2026-09-18", "debutFamily": "iphone-pro" },
 
     { "id": "S5", "series": "S", "gen": 5,  "tier": "base", "label": "S5",  "node": "7 nm", "debut": "2019-09-20", "debutFamily": "watch-series" },
     { "id": "S6", "series": "S", "gen": 6,  "tier": "base", "label": "S6",  "node": "7 nm", "debut": "2020-09-18", "debutFamily": "watch-series" },
@@ -41,6 +45,6 @@
     { "id": "S8", "series": "S", "gen": 8,  "tier": "base", "label": "S8",  "node": "7 nm", "debut": "2022-09-16", "debutFamily": "watch-series" },
     { "id": "S9", "series": "S", "gen": 9,  "tier": "base", "label": "S9",  "node": "7 nm", "debut": "2023-09-22", "debutFamily": "watch-series" },
     { "id": "S10","series": "S", "gen": 10, "tier": "base", "label": "S10", "node": "7 nm", "debut": "2024-09-20", "debutFamily": "watch-series" },
-    { "id": "S11","series": "S", "gen": 11, "tier": "base", "label": "S11", "node": "7 nm", "debut": "2025-09-19", "debutFamily": "watch-series" }
+    { "id": "S11","series": "S", "gen": 11, "tier": "base", "label": "S11", "node": "7 nm", "debut": "2026-09-18", "debutFamily": "watch-series" }
   ]
 }

@@ -25,6 +25,7 @@ const FAMILY_DISPLAY_ORDER = new Map([
   ['iphone-plus', 5],
   ['iphone-mini', 6],
   ['iphone-e', 7],
+  ['iphone-duo', 8],
   // iPad ailesi — Pro önce
   ['ipad-pro', 10],
   ['ipad-air', 11],

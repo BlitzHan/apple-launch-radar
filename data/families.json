@@ -14,6 +14,7 @@
     { "id": "iphone-plus",  "category": "iphone", "label": "iPhone Plus",         "short": "Plus",          "active": false, "chipAware": true,  "order": 5,  "note": "16 Plus son nesil; yerini iPhone Air aldı." },
     { "id": "iphone-mini",  "category": "iphone", "label": "iPhone mini",         "short": "mini",          "active": false, "chipAware": true,  "order": 6,  "note": "13 mini ile sonlandı." },
     { "id": "iphone-e",     "category": "iphone", "label": "iPhone SE / e serisi","short": "SE / e",        "active": true,  "chipAware": true,  "order": 7,  "note": "SE 2 → SE 3 → 16e → 17e. Şubat–Mart penceresine kaydı." },
+    { "id": "iphone-duo",   "category": "iphone", "label": "iPhone Duo",          "short": "Duo",           "active": true,  "chipAware": true,  "order": 8,  "note": "İlk katlanabilir iPhone; Pro lansmanıyla duyuruldu ama ayrı tarihte satışa çıktı. Tek nesil — tahmin zayıf." },
 
     { "id": "ipad-pro",  "category": "ipad", "label": "iPad Pro",        "short": "iPad Pro",  "active": true, "chipAware": true, "order": 1, "note": "M4 ilk kez burada çıktı — iPad Pro artık çip öncüsü olabiliyor." },
     { "id": "ipad-air",  "category": "ipad", "label": "iPad Air",        "short": "iPad Air",  "active": true, "chipAware": true, "order": 2 },
@@ -32,6 +33,6 @@
     { "id": "imac",               "category": "mac", "label": "iMac 24\"",                "short": "iMac",       "active": true,  "chipAware": true, "order": 6 },
     { "id": "mac-mini",           "category": "mac", "label": "Mac mini",                 "short": "Mac mini",   "active": true,  "chipAware": true, "order": 7 },
     { "id": "mac-studio",         "category": "mac", "label": "Mac Studio",               "short": "Studio",     "active": true,  "chipAware": true, "order": 8 },
-    { "id": "mac-pro",            "category": "mac", "label": "Mac Pro",                  "short": "Mac Pro",    "active": true,  "chipAware": true, "order": 9, "note": "Tek Apple Silicon nesli — kadans hesaplanamıyor." }
+    { "id": "mac-pro",            "category": "mac", "label": "Mac Pro",                  "short": "Mac Pro",    "active": false, "chipAware": true, "order": 9, "note": "Tek Apple Silicon nesli vardı; Apple Mart 2026'da hattı sonlandırdı, yerini Mac Studio aldı." }
   ]
 }
